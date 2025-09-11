@@ -27,7 +27,8 @@ pub trait TransactionPoller {
     type Transaction;
     type Account;
 
-    fn make_queue_item(&mut self, tx: Self::Transaction) -> ChainTransaction;
+    fn make_queue_item(&mut self, tx: Self::Transaction)
+        -> Result<ChainTransaction, anyhow::Error>;
 
     fn transaction_id(&self, tx: &Self::Transaction) -> Option<String>;
 
@@ -75,12 +76,16 @@ where
                         span.set_attribute("chain_transaction_id", s);
                     }
 
-                    let chain_transaction = self.transaction_poller.make_queue_item(tx);
-                    let item = &QueueItem::Transaction(Box::new(chain_transaction.clone()));
-                    info!("Publishing transaction: {:?}", chain_transaction);
+                    let maybe_chain_transaction = self.transaction_poller.make_queue_item(tx);
+                    if let Ok(chain_transaction) = maybe_chain_transaction {
+                        let item = &QueueItem::Transaction(Box::new(chain_transaction.clone()));
+                        info!("Publishing transaction: {:?}", chain_transaction);
 
-                    queue.publish(item.clone()).instrument(span).await;
-                    debug!("Published tx: {:?}", item);
+                        queue.publish(item.clone()).instrument(span).await;
+                        debug!("Published tx: {:?}", item);
+                    } else {
+                        error!("Error making queue item: {:?}", maybe_chain_transaction);
+                    }
                 }
             }
             Err(e) => {
@@ -113,12 +118,16 @@ where
 
             match res {
                 Ok(tx) => {
-                    let chain_transaction = self.transaction_poller.make_queue_item(tx);
-                    let item = &QueueItem::Transaction(Box::new(chain_transaction.clone()));
-                    info!("Publishing transaction: {:?}", chain_transaction);
+                    let maybe_chain_transaction = self.transaction_poller.make_queue_item(tx);
+                    if let Ok(chain_transaction) = maybe_chain_transaction {
+                        let item = &QueueItem::Transaction(Box::new(chain_transaction.clone()));
+                        info!("Publishing transaction: {:?}", chain_transaction);
 
-                    queue.publish(item.clone()).await;
-                    debug!("Published tx: {:?}", item);
+                        queue.publish(item.clone()).await;
+                        debug!("Published tx: {:?}", item);
+                    } else {
+                        error!("Error making queue item: {:?}", maybe_chain_transaction);
+                    }
                 }
                 Err(e) => {
                     error!("Error getting txs: {:?}", e);
