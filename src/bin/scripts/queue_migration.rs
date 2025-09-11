@@ -2,9 +2,9 @@ use anyhow::Result;
 use dotenv::dotenv;
 use futures::StreamExt;
 use lapin::options::BasicAckOptions;
-use relayer_base::config::config_from_yaml;
-use relayer_base::logging::setup_logging;
-use relayer_base::{
+use relayer_core::config::config_from_yaml;
+use relayer_core::logging::setup_logging;
+use relayer_core::{
     gmp_api::gmp_types::TaskKind,
     queue::{Queue, QueueItem},
 };

@@ -1,6 +1,5 @@
 use crate::queue::{Queue, QueueItem};
 use futures::Stream;
-use serde::{Deserialize, Serialize};
 use std::{future::Future, pin::Pin, sync::Arc};
 use tracing::{debug, error, info, info_span, Instrument};
 use tracing_opentelemetry::OpenTelemetrySpanExt;
@@ -49,11 +48,7 @@ pub struct Subscriber<TP: TransactionPoller> {
     transaction_poller: TP,
 }
 
-#[derive(Debug, Serialize, Deserialize, Clone)]
-pub enum ChainTransaction {
-    Xrpl(Box<xrpl_api::Transaction>),
-    TON(Box<ton_types::ton_types::Trace>),
-}
+pub type ChainTransaction = String;
 
 impl<TP: TransactionPoller> Subscriber<TP>
 where
