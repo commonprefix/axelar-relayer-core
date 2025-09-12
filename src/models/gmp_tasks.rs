@@ -288,7 +288,7 @@ mod tests {
     async fn test_crud() {
         let container = postgres::Postgres::default()
             .with_init_sql(
-                include_str!("../../migrations/0012_gmp_audit.sql")
+                include_str!("../../migrations/0005_gmp_audit.sql")
                     .to_string()
                     .into_bytes(),
             )
