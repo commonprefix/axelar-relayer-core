@@ -16,10 +16,10 @@ Otherwise, you can do it like so:
 # Example
 
 ```rust
-use relayer_base::gmp_api::{GmpApiDbAuditDecorator, GmpApiTrait, GmpApi, construct_gmp_api};
-use relayer_base::models::gmp_events::{GMPAudit, PgGMPEvents};
-use relayer_base::models::gmp_tasks::{GMPTaskAudit, PgGMPTasks};
-use relayer_base::config::Config;
+use relayer_core::gmp_api::{GmpApiDbAuditDecorator, GmpApiTrait, GmpApi, construct_gmp_api};
+use relayer_core::models::gmp_events::{GMPAudit, PgGMPEvents};
+use relayer_core::models::gmp_tasks::{GMPTaskAudit, PgGMPTasks};
+use relayer_core::config::Config;
 use sqlx::PgPool;
 use std::sync::Arc;
 

@@ -7,7 +7,7 @@ Configuration parser.
 ```rust,no_run
 // In your chain module, create a config.rs with your configuration that includes common configuration parameters:
 use serde::Deserialize;
-use relayer_base::config::{config_from_yaml, Config};
+use relayer_core::config::{config_from_yaml, Config};
 
 #[derive(Debug, Clone, Deserialize, Default)]
 pub struct MyConfig {
@@ -27,7 +27,7 @@ let config: MyConfig = config_from_yaml(&format!("config.{}.yaml", network)).unw
 # Notes
 
 common_config (Config) should be used for configuration options that are common to all chains and
-should be safe to pass to any relayer_base function.
+should be safe to pass to any relayer_core function.
 
 # TODO
 
