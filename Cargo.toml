@@ -76,6 +76,14 @@ path = "src/bin/price_feed.rs"
 name = "queue_migration"
 path = "src/bin/scripts/queue_migration.rs"
 
+[[bin]]
+name = "proof_retrier"
+path = "src/bin/recovery/proof_retrier.rs"
+
+[[bin]]
+name = "dlq_recovery"
+path = "src/bin/recovery/dlq_recovery.rs"
+
 [features]
 mocks = ["dep:mockall"]
 

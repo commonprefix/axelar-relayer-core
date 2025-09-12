@@ -1,1 +1,5 @@
 target
+.env
+config.mainnet.yaml
+config.devnet.yaml
+config.testnet.yaml
