@@ -75,7 +75,7 @@ pub fn setup_logging(config: &Config) -> (ClientInitGuard, SdkTracerProvider) {
 
     let fmt_layer = fmt::layer()
         .event_format(fmt::format().compact())
-        .with_filter(LevelFilter::INFO);
+        .with_filter(LevelFilter::DEBUG);
 
     let sentry_layer = sentry::integrations::tracing::layer()
         .event_filter(|metadata| match *metadata.level() {
