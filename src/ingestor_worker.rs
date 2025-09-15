@@ -52,7 +52,7 @@ impl IngestorWorker {
 
 #[async_trait]
 impl IngestorWorkerPrivateTrait for IngestorWorker {
-    #[tracing::instrument(skip(self))]
+    #[tracing::instrument(skip_all)]
     async fn consume(&self, item: QueueItem) -> Result<(), IngestorError> {
         match item {
             QueueItem::Task(task) => self.consume_task(*task).await,
@@ -63,7 +63,7 @@ impl IngestorWorkerPrivateTrait for IngestorWorker {
         }
     }
 
-    #[tracing::instrument(skip(self))]
+    #[tracing::instrument(skip_all)]
     async fn consume_transaction(
         &self,
         transaction: Box<ChainTransaction>,
@@ -109,7 +109,7 @@ impl IngestorWorkerPrivateTrait for IngestorWorker {
         Ok(()) // TODO: better error handling
     }
 
-    #[tracing::instrument(skip(self))]
+    #[tracing::instrument(skip_all)]
     async fn consume_task(&self, task: Task) -> Result<(), IngestorError> {
         match task {
             Task::Verify(verify_task) => {
@@ -154,7 +154,7 @@ impl IngestorWorkerPrivateTrait for IngestorWorker {
 
 #[async_trait]
 impl IngestorWorkerTrait for IngestorWorker {
-    #[tracing::instrument(skip(self))]
+    #[tracing::instrument(skip_all)]
     async fn process_delivery(&self, data: &[u8]) -> Result<(), IngestorError> {
         let item = serde_json::from_slice::<QueueItem>(data)
             .map_err(|e| IngestorError::ParseError(format!("Invalid JSON: {}", e)))?;
