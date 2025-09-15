@@ -73,6 +73,18 @@ pub fn extract_message_ids_and_event_types_from_events(
             Event::ITSInterchainTransfer { .. } => {
                 event_types.insert("ITSInterchainTransfer".to_string());
             }
+            Event::ITSTokenMetadataRegistered { .. } => {
+                event_types.insert("ITSTokenMetadataRegistered".to_string());
+            }
+            Event::ITSLinkTokenStarted { .. } => {
+                event_types.insert("ITSLinkTokenStarted".to_string());
+            }
+            Event::ITSInterchainTokenDeploymentStarted { .. } => {
+                event_types.insert("ITSInterchainTokenDeploymentStarted".to_string());
+            }
+            Event::SignersRotated { .. } => {
+                event_types.insert("SignersRotated".to_string());
+            }
         }
 
         // Extract message ID
@@ -84,7 +96,11 @@ pub fn extract_message_ids_and_event_types_from_events(
             | Event::GasCredit { message_id, .. }
             | Event::MessageExecuted { message_id, .. }
             | Event::CannotExecuteMessageV2 { message_id, .. }
-            | Event::ITSInterchainTransfer { message_id, .. } => {
+            | Event::ITSInterchainTransfer { message_id, .. }
+            | Event::ITSTokenMetadataRegistered { message_id, .. }
+            | Event::ITSLinkTokenStarted { message_id, .. }
+            | Event::ITSInterchainTokenDeploymentStarted { message_id, .. }
+            | Event::SignersRotated { message_id, .. } => {
                 message_ids.insert(message_id.clone());
             }
         }
