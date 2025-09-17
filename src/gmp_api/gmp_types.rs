@@ -489,8 +489,9 @@ pub enum Event {
         destination_token_address: String,
         #[serde(rename = "tokenManagerType")]
         token_manager_type: TokenManagerType,
-        #[serde(default)]
-        params: Vec<u8>,
+        // TBD If we need this
+        // #[serde(default)]
+        // params: Vec<u8>,
     },
     ITSInterchainTokenDeploymentStarted {
         #[serde(flatten)]
