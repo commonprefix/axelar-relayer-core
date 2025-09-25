@@ -31,6 +31,7 @@ use tracing::{debug, error, info, warn, Instrument, Span};
 use uuid::Uuid;
 
 use crate::logging::distributed_tracing_headers;
+use crate::utils::ThreadSafe;
 use crate::{gmp_api::gmp_types::Task, subscriber::ChainTransaction};
 use async_trait::async_trait;
 
@@ -53,7 +54,7 @@ pub struct Queue {
 
 #[cfg_attr(any(test, feature = "mocks"), mockall::automock)]
 #[async_trait]
-pub trait QueueTrait: Send + Sync {
+pub trait QueueTrait: ThreadSafe {
     async fn publish(&self, item: QueueItem);
     async fn republish(&self, delivery: Delivery, force_requeue: bool)
         -> Result<(), anyhow::Error>;
