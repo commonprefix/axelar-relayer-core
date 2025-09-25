@@ -9,7 +9,7 @@ use crate::utils::{setup_heartbeat, ThreadSafe};
 use crate::{
     error::IngestorError,
     gmp_api::gmp_types::{ConstructProofTask, Event, ReactToWasmEventTask, RetryTask, VerifyTask},
-    queue::{Queue, QueueItem},
+    queue::{QueueItem, QueueTrait},
     subscriber::ChainTransaction,
 };
 use async_trait::async_trait;
@@ -46,7 +46,12 @@ impl<W> QueueConsumer for Ingestor<W>
 where
     W: IngestorWorkerTrait + Clone + ThreadSafe,
 {
-    async fn on_delivery(&self, delivery: Delivery, queue: Arc<Queue>, tracker: &TaskTracker) {
+    async fn on_delivery(
+        &self,
+        delivery: Delivery,
+        queue: Arc<dyn QueueTrait>,
+        tracker: &TaskTracker,
+    ) {
         let worker = self.worker.clone();
         let queue_clone = Arc::clone(&queue);
         tracker.spawn(async move {
@@ -102,8 +107,8 @@ where
 
     pub async fn run(
         &self,
-        events_queue: Arc<Queue>,
-        tasks_queue: Arc<Queue>,
+        events_queue: Arc<dyn QueueTrait>,
+        tasks_queue: Arc<dyn QueueTrait>,
         token: CancellationToken,
     ) {
         let mut events_consumer = match events_queue.consumer().await {
@@ -135,8 +140,8 @@ where
 }
 
 pub async fn run_ingestor(
-    tasks_queue: &Arc<Queue>,
-    events_queue: &Arc<Queue>,
+    tasks_queue: &Arc<dyn QueueTrait>,
+    events_queue: &Arc<dyn QueueTrait>,
     gmp_api: Arc<GmpApiDbAuditDecorator<GmpApi, PgGMPTasks, PgGMPEvents>>,
     redis_conn: ConnectionManager,
     logging_ctx_cache: Arc<dyn LoggingCtxCache>,

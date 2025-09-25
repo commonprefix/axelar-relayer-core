@@ -1,4 +1,4 @@
-use crate::queue::Queue;
+use crate::queue::QueueTrait;
 use async_std::stream::StreamExt;
 use async_trait::async_trait;
 use lapin::message::Delivery;
@@ -11,9 +11,19 @@ use tracing::{debug, error, info, warn};
 
 #[async_trait]
 pub trait QueueConsumer {
-    async fn on_delivery(&self, delivery: Delivery, queue: Arc<Queue>, tracker: &TaskTracker);
+    async fn on_delivery(
+        &self,
+        delivery: Delivery,
+        queue: Arc<dyn QueueTrait>,
+        tracker: &TaskTracker,
+    );
 
-    async fn work(&self, consumer: &mut Consumer, queue: Arc<Queue>, token: CancellationToken) {
+    async fn work(
+        &self,
+        consumer: &mut Consumer,
+        queue: Arc<dyn QueueTrait>,
+        token: CancellationToken,
+    ) {
         let tracker = TaskTracker::new();
 
         loop {

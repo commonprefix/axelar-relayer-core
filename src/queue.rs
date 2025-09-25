@@ -32,6 +32,7 @@ use uuid::Uuid;
 
 use crate::logging::distributed_tracing_headers;
 use crate::{gmp_api::gmp_types::Task, subscriber::ChainTransaction};
+use async_trait::async_trait;
 
 const DEAD_LETTER_EXCHANGE: &str = "dlx_exchange";
 const DEAD_LETTER_QUEUE_PREFIX: &str = "dead_letter_";
@@ -48,6 +49,16 @@ pub struct Queue {
     buffer_sender: Arc<Sender<QueueItemWithSpan>>,
     buffer_processor: Arc<RwLock<Option<BufferProcessor>>>,
     num_workers: u16,
+}
+
+#[cfg_attr(any(test, feature = "mocks"), mockall::automock)]
+#[async_trait]
+pub trait QueueTrait: Send + Sync {
+    async fn publish(&self, item: QueueItem);
+    async fn republish(&self, delivery: Delivery, force_requeue: bool)
+        -> Result<(), anyhow::Error>;
+    async fn consumer(&self) -> Result<Consumer, anyhow::Error>;
+    async fn close(&self);
 }
 
 #[derive(Serialize, Deserialize, Debug, Clone)]
@@ -495,5 +506,28 @@ impl Queue {
                 warn!("No handle found for buffer processor");
             }
         }
+    }
+}
+
+#[async_trait]
+impl QueueTrait for Queue {
+    async fn publish(&self, item: QueueItem) {
+        Queue::publish(self, item).await;
+    }
+
+    async fn republish(
+        &self,
+        delivery: Delivery,
+        force_requeue: bool,
+    ) -> Result<(), anyhow::Error> {
+        Queue::republish(self, delivery, force_requeue).await
+    }
+
+    async fn consumer(&self) -> Result<Consumer, anyhow::Error> {
+        Queue::consumer(self).await
+    }
+
+    async fn close(&self) {
+        Queue::close(self).await;
     }
 }

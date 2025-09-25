@@ -7,7 +7,7 @@ use crate::{
     database::Database,
     error::DistributorError,
     gmp_api::gmp_types::TaskKind,
-    queue::{Queue, QueueItem},
+    queue::{QueueItem, QueueTrait},
 };
 use std::sync::Arc;
 use tracing::{info, info_span, warn, Instrument};
@@ -105,8 +105,8 @@ where
 
     async fn work(
         &mut self,
-        includer_queue: Arc<Queue>,
-        ingestor_queue: Arc<Queue>,
+        includer_queue: Arc<dyn QueueTrait>,
+        ingestor_queue: Arc<dyn QueueTrait>,
         tasks_filter: Option<Vec<TaskKind>>,
     ) -> Result<Vec<String>, DistributorError> {
         let mut processed_task_ids = Vec::new();
@@ -143,10 +143,10 @@ where
 
             let queue = if self.supported_includer_tasks.contains(&task.kind()) {
                 info!("Publishing task to includer queue: {:?}", task);
-                Arc::<Queue>::clone(&includer_queue)
+                Arc::clone(&includer_queue)
             } else if self.supported_ingestor_tasks.contains(&task.kind()) {
                 info!("Publishing task to ingestor queue: {:?}", task);
-                Arc::<Queue>::clone(&ingestor_queue)
+                Arc::clone(&ingestor_queue)
             } else {
                 warn!("Dropping unsupported task: {:?}", task);
                 continue;
@@ -157,7 +157,11 @@ where
         Ok(processed_task_ids)
     }
 
-    pub async fn run(&mut self, includer_queue: Arc<Queue>, ingestor_queue: Arc<Queue>) {
+    pub async fn run(
+        &mut self,
+        includer_queue: Arc<dyn QueueTrait>,
+        ingestor_queue: Arc<dyn QueueTrait>,
+    ) {
         loop {
             info!("Distributor is alive.");
             let work_res = self
@@ -174,7 +178,11 @@ where
         }
     }
 
-    pub async fn run_recovery(&mut self, includer_queue: Arc<Queue>, ingestor_queue: Arc<Queue>) {
+    pub async fn run_recovery(
+        &mut self,
+        includer_queue: Arc<dyn QueueTrait>,
+        ingestor_queue: Arc<dyn QueueTrait>,
+    ) {
         let recovery_settings = match &self.recovery_settings {
             Some(settings) => settings.clone(),
             None => {
