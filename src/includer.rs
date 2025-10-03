@@ -17,7 +17,7 @@ use crate::{
     database::Database,
     error::{BroadcasterError, IncluderError, RefundManagerError},
     gmp_api::gmp_types::RefundTask,
-    queue::{Queue, QueueItem},
+    queue::{QueueItem, QueueTrait},
 };
 
 #[async_trait]
@@ -96,7 +96,12 @@ where
     DB: Database + ThreadSafe + Clone,
     G: GmpApiTrait + ThreadSafe + Clone,
 {
-    async fn on_delivery(&self, delivery: Delivery, queue: Arc<Queue>, tracker: &TaskTracker) {
+    async fn on_delivery(
+        &self,
+        delivery: Delivery,
+        queue: Arc<dyn QueueTrait>,
+        tracker: &TaskTracker,
+    ) {
         let worker = self.worker.clone();
         let queue_clone = Arc::clone(&queue);
         tracker.spawn(async move {
@@ -153,7 +158,7 @@ where
     pub fn new(worker: IncluderWorker<B, C, R, DB, G>) -> Self {
         Self { worker }
     }
-    pub async fn run(&self, queue: Arc<Queue>, token: CancellationToken) {
+    pub async fn run(&self, queue: Arc<dyn QueueTrait>, token: CancellationToken) {
         if let Ok(mut consumer) = queue.consumer().await {
             info!("Includer is alive.");
             self.work(&mut consumer, Arc::clone(&queue), token.clone())
