@@ -47,9 +47,9 @@ where
 #[derive(PartialEq, Debug)]
 pub struct BroadcastResult<T> {
     pub transaction: T,
-    pub tx_hash: Vec<String>,
+    pub tx_hash: String,
     pub status: Result<(), BroadcasterError>,
-    pub message_id: Vec<String>,
+    pub message_id: Option<String>,
     pub source_chain: Option<String>,
 }
 
