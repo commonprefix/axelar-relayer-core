@@ -63,7 +63,7 @@ where
     async fn broadcast_prover_message(
         &self,
         tx_blob: String,
-    ) -> Result<BroadcastResult<Self::Transaction>, BroadcasterError>;
+    ) -> Result<Vec<BroadcastResult<Self::Transaction>>, BroadcasterError>;
 
     async fn broadcast_refund(&self, tx_blob: String) -> Result<String, BroadcasterError>;
     async fn broadcast_execute_message(
