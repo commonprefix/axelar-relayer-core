@@ -48,6 +48,8 @@ pub enum ClientError {
     BadRequest(String),
     #[error("Bad response: {0}")]
     BadResponse(String),
+    #[error("Generic error: {0}")]
+    GenericError(String),
 }
 
 #[derive(Error, Debug, Clone)]
