@@ -447,7 +447,13 @@ impl Queue {
         };
 
         let properties = properties.unwrap_or(BasicProperties::default().with_delivery_mode(2));
-        let headers = distributed_tracing_headers(&Span::current());
+        let mut span_headers = distributed_tracing_headers(&Span::current());
+        let mut headers = properties
+            .headers()
+            .as_ref()
+            .map(|h| h.inner().clone())
+            .unwrap_or_default();
+        headers.append(&mut span_headers);
         let properties = properties.with_headers(FieldTable::from(headers));
 
         let confirm = channel_lock

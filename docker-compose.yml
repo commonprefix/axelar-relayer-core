@@ -123,3 +123,7 @@ volumes:
   grafana_data:
   opensearch_data:
   prometheus_data:
+
+networks:
+  axelar-relayer:
+    name: axelar-relayer
