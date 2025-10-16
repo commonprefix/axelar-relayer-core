@@ -10,8 +10,20 @@ pub enum IncluderError {
     ConsumerError(String),
     #[error("Irrelevant task")]
     IrrelevantTask,
+    #[error("Task handler error: {0}")]
+    TaskHandlerError(TaskHandlerError),
     #[error("Generic error: {0}")]
     GenericError(String),
+}
+
+#[derive(Error, Debug)]
+pub enum TaskHandlerError {
+    #[error("Failed to handle execute task: {0}")]
+    ExecuteTaskError(String),
+    #[error("Failed to handle gateway tx task: {0}")]
+    GatewayTxTaskError(String),
+    #[error("Failed to handle refund task: {0}")]
+    RefundTaskError(String),
 }
 
 #[derive(Error, Debug)]

@@ -9,7 +9,7 @@ use tracing_opentelemetry::OpenTelemetrySpanExt;
 
 use crate::gmp_api::gmp_types::{ExecuteTaskFields, RefundTaskFields};
 use crate::gmp_api::GmpApiTrait;
-use crate::includer_worker::{IncluderWorker, IncluderWorkerTrait};
+use crate::includer_worker::{IncluderWorker, IncluderWorkerTrait, TaskHandlerTrait};
 use crate::logging::distributed_tracing_extract_parent_context;
 use crate::queue_consumer::QueueConsumer;
 use crate::utils::ThreadSafe;
@@ -76,25 +76,27 @@ where
     ) -> Result<String, BroadcasterError>;
 }
 
-pub struct Includer<B, C, R, DB, G>
+pub struct Includer<B, C, R, DB, G, H>
 where
     C: ThreadSafe + Clone,
     B: Broadcaster + ThreadSafe + Clone,
     R: RefundManager + ThreadSafe + Clone,
     DB: Database + ThreadSafe + Clone,
     G: GmpApiTrait + ThreadSafe + Clone,
+    H: TaskHandlerTrait + ThreadSafe + Clone,
 {
-    worker: IncluderWorker<B, C, R, DB, G>,
+    worker: IncluderWorker<B, C, R, DB, G, H>,
 }
 
 #[async_trait]
-impl<B, C, R, DB, G> QueueConsumer for Includer<B, C, R, DB, G>
+impl<B, C, R, DB, G, H> QueueConsumer for Includer<B, C, R, DB, G, H>
 where
     C: ThreadSafe + Clone,
     B: Broadcaster + ThreadSafe + Clone,
     R: RefundManager + ThreadSafe + Clone,
     DB: Database + ThreadSafe + Clone,
     G: GmpApiTrait + ThreadSafe + Clone,
+    H: TaskHandlerTrait + ThreadSafe + Clone,
 {
     async fn on_delivery(
         &self,
@@ -147,15 +149,16 @@ where
     }
 }
 
-impl<B, C, R, DB, G> Includer<B, C, R, DB, G>
+impl<B, C, R, DB, G, H> Includer<B, C, R, DB, G, H>
 where
     C: ThreadSafe + Clone,
     B: Broadcaster + ThreadSafe + Clone,
     R: RefundManager + ThreadSafe + Clone,
     DB: Database + ThreadSafe + Clone,
     G: GmpApiTrait + ThreadSafe + Clone,
+    H: TaskHandlerTrait + ThreadSafe + Clone,
 {
-    pub fn new(worker: IncluderWorker<B, C, R, DB, G>) -> Self {
+    pub fn new(worker: IncluderWorker<B, C, R, DB, G, H>) -> Self {
         Self { worker }
     }
     pub async fn run(&self, queue: Arc<dyn QueueTrait>, token: CancellationToken) {
