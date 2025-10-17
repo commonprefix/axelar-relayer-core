@@ -46,7 +46,6 @@ where
 
 #[derive(PartialEq, Debug)]
 pub struct CannotExecuteMessage {
-    pub tx_hash: String,
     pub message_id: String,
     pub source_chain: String,
     pub details: String,
