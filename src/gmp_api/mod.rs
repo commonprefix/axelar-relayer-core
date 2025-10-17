@@ -445,13 +445,11 @@ impl GmpApiTrait for GmpApi {
         source_chain: String,
         details: String,
         reason: CannotExecuteMessageReason,
-    ) -> Result<(), GmpApiError> {
+    ) -> Result<Event, GmpApiError> {
         let cannot_execute_message_event =
             self.map_cannot_execute_message_to_event(id, message_id, source_chain, details, reason);
 
-        self.post_events(vec![cannot_execute_message_event]).await?;
-
-        Ok(())
+        Ok(cannot_execute_message_event)
     }
 
     async fn its_interchain_transfer(&self, xrpl_message: XRPLMessage) -> Result<(), GmpApiError> {
@@ -516,7 +514,7 @@ pub trait GmpApiTrait {
         source_chain: String,
         details: String,
         reason: CannotExecuteMessageReason,
-    ) -> Result<(), GmpApiError>;
+    ) -> Result<Event, GmpApiError>;
     async fn its_interchain_transfer(&self, xrpl_message: XRPLMessage) -> Result<(), GmpApiError>;
 
     fn map_cannot_execute_message_to_event(

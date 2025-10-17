@@ -249,7 +249,7 @@ where
         source_chain: String,
         details: String,
         reason: CannotExecuteMessageReason,
-    ) -> Result<(), GmpApiError> {
+    ) -> Result<Event, GmpApiError> {
         let cannot_execute_message_event = self.gmp_api.map_cannot_execute_message_to_event(
             id,
             message_id,
@@ -258,9 +258,7 @@ where
             reason,
         );
 
-        self.post_events(vec![cannot_execute_message_event]).await?;
-
-        Ok(())
+        Ok(cannot_execute_message_event)
     }
 
     #[tracing::instrument(skip(self))]
@@ -580,7 +578,19 @@ mod tests {
                 eq("details123".to_string()),
                 eq(CannotExecuteMessageReason::InsufficientGas),
             )
-            .returning(|_, _, _, _, _| Ok(()));
+            .returning(|id, message_id, source_chain, details, reason| {
+                Ok(Event::CannotExecuteMessageV2 {
+                    common: CommonEventFields {
+                        r#type: "CANNOT_EXECUTE_MESSAGE/V2".to_owned(),
+                        event_id: format!("cannot-execute-task-v2-{}", id), // Fixed: use the actual id parameter
+                        meta: None,
+                    },
+                    message_id,
+                    source_chain,
+                    reason,
+                    details,
+                })
+            });
 
         mock_gmp_api
             .expect_its_interchain_transfer()
