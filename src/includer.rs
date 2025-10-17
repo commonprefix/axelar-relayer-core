@@ -7,17 +7,16 @@ use tokio_util::task::TaskTracker;
 use tracing::{debug, error, info, info_span, Instrument};
 use tracing_opentelemetry::OpenTelemetrySpanExt;
 
-use crate::gmp_api::gmp_types::{ExecuteTaskFields, RefundTaskFields};
 use crate::gmp_api::GmpApiTrait;
-use crate::includer_worker::{IncluderWorker, IncluderWorkerTrait};
+use crate::includer_worker::{IncluderTrait, IncluderWorker, IncluderWorkerTrait};
 use crate::logging::distributed_tracing_extract_parent_context;
 use crate::queue_consumer::QueueConsumer;
 use crate::utils::ThreadSafe;
 use crate::{
     database::Database,
-    error::{BroadcasterError, IncluderError, RefundManagerError},
+    error::{IncluderError, RefundManagerError},
     gmp_api::gmp_types::RefundTask,
-    queue::{Queue, QueueItem},
+    queue::{QueueItem, QueueTrait},
 };
 
 #[async_trait]
@@ -44,59 +43,32 @@ where
     async fn release_wallet_lock(&self, wallet: Self::Wallet) -> Result<(), RefundManagerError>;
 }
 
-#[derive(PartialEq, Debug)]
-pub struct BroadcastResult<T> {
-    pub transaction: T,
-    pub tx_hash: String,
-    pub status: Result<(), BroadcasterError>,
-    pub message_id: Option<String>,
-    pub source_chain: Option<String>,
-}
-
-#[async_trait]
-pub trait Broadcaster
-where
-    Self::Transaction: ThreadSafe,
-{
-    type Transaction;
-
-    async fn broadcast_prover_message(
-        &self,
-        tx_blob: String,
-    ) -> Result<BroadcastResult<Self::Transaction>, BroadcasterError>;
-
-    async fn broadcast_refund(&self, tx_blob: String) -> Result<String, BroadcasterError>;
-    async fn broadcast_execute_message(
-        &self,
-        message: ExecuteTaskFields,
-    ) -> Result<BroadcastResult<Self::Transaction>, BroadcasterError>;
-    async fn broadcast_refund_message(
-        &self,
-        refund_task: RefundTaskFields,
-    ) -> Result<String, BroadcasterError>;
-}
-
-pub struct Includer<B, C, R, DB, G>
+pub struct Includer<C, R, DB, G, I>
 where
     C: ThreadSafe + Clone,
-    B: Broadcaster + ThreadSafe + Clone,
     R: RefundManager + ThreadSafe + Clone,
     DB: Database + ThreadSafe + Clone,
     G: GmpApiTrait + ThreadSafe + Clone,
+    I: IncluderTrait + ThreadSafe + Clone,
 {
-    worker: IncluderWorker<B, C, R, DB, G>,
+    worker: IncluderWorker<C, R, DB, G, I>,
 }
 
 #[async_trait]
-impl<B, C, R, DB, G> QueueConsumer for Includer<B, C, R, DB, G>
+impl<C, R, DB, G, I> QueueConsumer for Includer<C, R, DB, G, I>
 where
     C: ThreadSafe + Clone,
-    B: Broadcaster + ThreadSafe + Clone,
     R: RefundManager + ThreadSafe + Clone,
     DB: Database + ThreadSafe + Clone,
     G: GmpApiTrait + ThreadSafe + Clone,
+    I: IncluderTrait + ThreadSafe + Clone,
 {
-    async fn on_delivery(&self, delivery: Delivery, queue: Arc<Queue>, tracker: &TaskTracker) {
+    async fn on_delivery(
+        &self,
+        delivery: Delivery,
+        queue: Arc<dyn QueueTrait>,
+        tracker: &TaskTracker,
+    ) {
         let worker = self.worker.clone();
         let queue_clone = Arc::clone(&queue);
         tracker.spawn(async move {
@@ -142,18 +114,18 @@ where
     }
 }
 
-impl<B, C, R, DB, G> Includer<B, C, R, DB, G>
+impl<C, R, DB, G, I> Includer<C, R, DB, G, I>
 where
     C: ThreadSafe + Clone,
-    B: Broadcaster + ThreadSafe + Clone,
     R: RefundManager + ThreadSafe + Clone,
     DB: Database + ThreadSafe + Clone,
     G: GmpApiTrait + ThreadSafe + Clone,
+    I: IncluderTrait + ThreadSafe + Clone,
 {
-    pub fn new(worker: IncluderWorker<B, C, R, DB, G>) -> Self {
+    pub fn new(worker: IncluderWorker<C, R, DB, G, I>) -> Self {
         Self { worker }
     }
-    pub async fn run(&self, queue: Arc<Queue>, token: CancellationToken) {
+    pub async fn run(&self, queue: Arc<dyn QueueTrait>, token: CancellationToken) {
         if let Ok(mut consumer) = queue.consumer().await {
             info!("Includer is alive.");
             self.work(&mut consumer, Arc::clone(&queue), token.clone())
