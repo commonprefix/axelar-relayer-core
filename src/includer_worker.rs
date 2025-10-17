@@ -1,8 +1,8 @@
 use crate::database::Database;
 use crate::error::IncluderError;
-use crate::gmp_api::gmp_types::{ExecuteTask, GatewayTxTask, RefundTask, Task};
+use crate::gmp_api::gmp_types::{Event, ExecuteTask, GatewayTxTask, RefundTask, Task};
 use crate::gmp_api::GmpApiTrait;
-use crate::includer::{CannotExecuteMessage, RefundManager};
+use crate::includer::RefundManager;
 use crate::payload_cache::PayloadCache;
 use crate::queue::Queue;
 use crate::queue::QueueItem;
@@ -77,7 +77,7 @@ pub trait IncluderTrait {
     async fn handle_gateway_tx_task(
         &self,
         task: GatewayTxTask,
-    ) -> Result<Vec<CannotExecuteMessage>, IncluderError>;
+    ) -> Result<Vec<Event>, IncluderError>;
     async fn handle_refund_task(&self, task: RefundTask) -> Result<(), IncluderError>;
 }
 
@@ -164,31 +164,14 @@ where
                 }
                 Task::GatewayTx(gateway_tx_task) => {
                     info!("Consuming task: {:?}", gateway_tx_task);
-                    let cannot_execute_messages = self
+                    let events = self
                         .includer
                         .handle_gateway_tx_task(gateway_tx_task.clone())
                         .await
                         .map_err(|e| IncluderError::GatewayTxTaskError(e.to_string()))?;
 
-                    let mut cannot_execute_messages_events = Vec::new();
-
-                    for message in cannot_execute_messages.iter() {
-                        cannot_execute_messages_events.push(
-                            self.gmp_api
-                                .cannot_execute_message(
-                                    gateway_tx_task.common.id.clone(),
-                                    message.message_id.clone(),
-                                    message.source_chain.clone(),
-                                    message.details.clone(),
-                                    message.reason.clone(),
-                                )
-                                .await
-                                .map_err(|e| IncluderError::ConsumerError(e.to_string()))?,
-                        )
-                    }
-
                     self.gmp_api
-                        .post_events(cannot_execute_messages_events)
+                        .post_events(events)
                         .await
                         .map_err(|e| IncluderError::ConsumerError(e.to_string()))?;
 

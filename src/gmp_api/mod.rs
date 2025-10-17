@@ -212,6 +212,11 @@ impl GmpApiTrait for GmpApi {
 
     #[tracing::instrument(skip(self))]
     async fn post_events(&self, events: Vec<Event>) -> Result<Vec<PostEventResult>, GmpApiError> {
+        if events.is_empty() {
+            debug!("No events to post.");
+            return Ok(vec![]);
+        }
+
         let mut map = HashMap::new();
         map.insert("events", events);
 

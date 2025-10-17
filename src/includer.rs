@@ -7,7 +7,6 @@ use tokio_util::task::TaskTracker;
 use tracing::{debug, error, info, info_span, Instrument};
 use tracing_opentelemetry::OpenTelemetrySpanExt;
 
-use crate::gmp_api::gmp_types::CannotExecuteMessageReason;
 use crate::gmp_api::GmpApiTrait;
 use crate::includer_worker::{IncluderTrait, IncluderWorker, IncluderWorkerTrait};
 use crate::logging::distributed_tracing_extract_parent_context;
@@ -42,14 +41,6 @@ where
     ) -> Result<bool, RefundManagerError>;
     async fn get_wallet_lock(&self) -> Result<Self::Wallet, RefundManagerError>;
     async fn release_wallet_lock(&self, wallet: Self::Wallet) -> Result<(), RefundManagerError>;
-}
-
-#[derive(PartialEq, Debug)]
-pub struct CannotExecuteMessage {
-    pub message_id: String,
-    pub source_chain: String,
-    pub details: String,
-    pub reason: CannotExecuteMessageReason,
 }
 
 pub struct Includer<C, R, DB, G, I>
