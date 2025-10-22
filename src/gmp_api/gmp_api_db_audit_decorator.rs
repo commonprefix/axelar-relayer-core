@@ -44,7 +44,8 @@ async fn create(config: &Config, pg_pool: PgPool) -> anyhow::Result<impl GmpApiT
 use crate::config::Config;
 use crate::error::GmpApiError;
 use crate::gmp_api::gmp_types::{
-    BroadcastRequest, CannotExecuteMessageReason, Event, PostEventResult, QueryRequest, Task,
+    Amount, BroadcastRequest, CannotExecuteMessageReason, Event, MessageExecutionStatus,
+    PostEventResult, QueryRequest, Task,
 };
 use crate::gmp_api::{GmpApi, GmpApiTrait};
 use crate::models::gmp_events::{EventModel, GMPAudit, PgGMPEvents};
@@ -264,6 +265,17 @@ where
     #[tracing::instrument(skip(self))]
     async fn its_interchain_transfer(&self, xrpl_message: XRPLMessage) -> Result<(), GmpApiError> {
         self.gmp_api.its_interchain_transfer(xrpl_message).await
+    }
+
+    fn execute_message(
+        &self,
+        message_id: String,
+        source_chain: String,
+        status: MessageExecutionStatus,
+        cost: Amount,
+    ) -> Event {
+        self.gmp_api
+            .execute_message(message_id, source_chain, status, cost)
     }
 
     fn map_cannot_execute_message_to_event(

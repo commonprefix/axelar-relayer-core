@@ -17,12 +17,14 @@ use std::{
     time::Duration,
 };
 use tracing::{debug, info, warn};
+use uuid::Uuid;
 use xrpl_amplifier_types::msg::XRPLMessage;
 
 use crate::{config::Config, error::GmpApiError, utils::parse_task};
 use gmp_types::{
     Amount, BroadcastRequest, CannotExecuteMessageReason, CommonEventFields, Event,
-    PostEventResponse, PostEventResult, QueryRequest, StorePayloadResult, Task,
+    MessageExecutionStatus, PostEventResponse, PostEventResult, QueryRequest, StorePayloadResult,
+    Task,
 };
 use reqwest::Identity;
 use reqwest_tracing::TracingMiddleware;
@@ -443,6 +445,26 @@ impl GmpApiTrait for GmpApi {
         }
     }
 
+    fn execute_message(
+        &self,
+        message_id: String,
+        source_chain: String,
+        status: MessageExecutionStatus,
+        cost: Amount,
+    ) -> Event {
+        Event::MessageExecuted {
+            common: CommonEventFields {
+                r#type: "MESSAGE_EXECUTED".to_owned(),
+                event_id: Uuid::new_v4().to_string(),
+                meta: None,
+            },
+            message_id,
+            source_chain,
+            status,
+            cost,
+        }
+    }
+
     async fn cannot_execute_message(
         &self,
         id: String,
@@ -529,6 +551,13 @@ pub trait GmpApiTrait {
         source_chain: String,
         details: String,
         reason: CannotExecuteMessageReason,
+    ) -> Event;
+    fn execute_message(
+        &self,
+        message_id: String,
+        source_chain: String,
+        status: MessageExecutionStatus,
+        cost: Amount,
     ) -> Event;
 }
 
