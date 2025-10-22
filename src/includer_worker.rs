@@ -73,12 +73,20 @@ where
 
 #[async_trait]
 pub trait IncluderTrait {
-    async fn handle_execute_task(&self, task: ExecuteTask) -> Result<(), IncluderError>;
+    async fn handle_execute_task(
+        &self,
+        task: ExecuteTask,
+    ) -> Result<ExecuteTaskEvents, IncluderError>;
     async fn handle_gateway_tx_task(
         &self,
         task: GatewayTxTask,
     ) -> Result<Vec<Event>, IncluderError>;
     async fn handle_refund_task(&self, task: RefundTask) -> Result<(), IncluderError>;
+}
+
+pub struct ExecuteTaskEvents {
+    pub cannot_execute_events: Vec<Event>,
+    pub reverted_events: Vec<Event>,
 }
 
 #[async_trait]
@@ -96,70 +104,17 @@ where
             QueueItem::Task(task) => match *task {
                 Task::Execute(execute_task) => {
                     info!("Consuming execute task: {:?}", execute_task);
-                    self.includer
-                        .handle_execute_task(execute_task)
+                    let events = self.includer.handle_execute_task(execute_task).await?;
+                    self.gmp_api
+                        .post_events(events.cannot_execute_events)
                         .await
-                        .map_err(|e| IncluderError::ExecuteTaskError(e.to_string()))?;
-                    // let broadcast_result = match self
-                    //     .broadcaster
-                    //     .broadcast_execute_message(execute_task.task)
-                    //     .await
-                    // {
-                    //     Ok(result) => result,
-                    //     Err(BroadcasterError::IrrelevantTask(_)) => {
-                    //         return Ok(());
-                    //     }
-                    //     Err(e) => {
-                    //         return Err(IncluderError::ConsumerError(e.to_string()));
-                    //     }
-                    // };
+                        .map_err(|e| IncluderError::ConsumerError(e.to_string()))?;
 
-                    // if Self::broadcast_result_has_message(&broadcast_result)
-                    //     && broadcast_result.status.is_ok()
-                    // {
-                    //     return Ok(());
-                    // }
+                    self.gmp_api
+                        .post_events(events.reverted_events)
+                        .await
+                        .map_err(|e| IncluderError::ConsumerError(e.to_string()))?;
 
-                    // let (gmp_error, retry, err) = match &broadcast_result.status {
-                    //     Err(err) => {
-                    //         let (gmp_error, retry) = match err {
-                    //             BroadcasterError::InsufficientGas(_) => {
-                    //                 (CannotExecuteMessageReason::InsufficientGas, false)
-                    //             }
-                    //             _ => {
-                    //                 warn!("Failed to broadcast execute message: {:?}", err);
-                    //                 (CannotExecuteMessageReason::Error, true)
-                    //             }
-                    //         };
-                    //         (gmp_error, retry, err)
-                    //     }
-                    //     Ok(_) => unreachable!("Expected broadcast_result.status to be Err"),
-                    // };
-
-                    // if Self::broadcast_result_has_message(&broadcast_result) {
-                    //     let message_id = broadcast_result.message_id.ok_or_else(|| {
-                    //         IncluderError::ConsumerError("Message ID is missing".to_string())
-                    //     })?;
-                    //     let source_chain = broadcast_result.source_chain.ok_or_else(|| {
-                    //         IncluderError::ConsumerError("Source chain is missing".to_string())
-                    //     })?;
-
-                    //     self.gmp_api
-                    //         .cannot_execute_message(
-                    //             execute_task.common.id,
-                    //             message_id,
-                    //             source_chain,
-                    //             err.to_string(),
-                    //             gmp_error,
-                    //         )
-                    //         .await
-                    //         .map_err(|e| IncluderError::ConsumerError(e.to_string()))?;
-                    // }
-
-                    // if !retry {
-                    //     return Ok(());
-                    // }
-                    // Err(IncluderError::ConsumerError(err.to_string()))
                     Ok(())
                 }
                 Task::GatewayTx(gateway_tx_task) => {

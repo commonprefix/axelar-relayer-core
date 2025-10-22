@@ -30,22 +30,6 @@ pub enum RefundManagerError {
     GenericError(String),
 }
 
-#[derive(Error, Debug, PartialEq)]
-pub enum BroadcasterError {
-    #[error("Connection failed: {0}")]
-    ConnectionFailed(String),
-    #[error("RPC Call Failed: {0}")]
-    RPCCallFailed(String),
-    #[error("RPC call failed: {0}")]
-    RPCError(String),
-    #[error("Insufficient gas: {0}")]
-    InsufficientGas(String),
-    #[error("Irrelevant task: {0}")]
-    IrrelevantTask(String),
-    #[error("Generic error: {0}")]
-    GenericError(String),
-}
-
 #[derive(Error, Debug)]
 pub enum ClientError {
     #[error("Connection failed: {0}")]
