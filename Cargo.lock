@@ -251,65 +251,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "alloy-sol-macro"
-version = "0.7.7"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "2b40397ddcdcc266f59f959770f601ce1280e699a91fc1862f29cef91707cd09"
-dependencies = [
- "alloy-sol-macro-expander",
- "alloy-sol-macro-input",
- "proc-macro-error",
- "proc-macro2",
- "quote",
- "syn 2.0.106",
-]
-
-[[package]]
-name = "alloy-sol-macro-expander"
-version = "0.7.7"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "867a5469d61480fea08c7333ffeca52d5b621f5ca2e44f271b117ec1fc9a0525"
-dependencies = [
- "alloy-sol-macro-input",
- "const-hex",
- "heck 0.5.0",
- "indexmap 2.11.1",
- "proc-macro-error",
- "proc-macro2",
- "quote",
- "syn 2.0.106",
- "syn-solidity",
- "tiny-keccak",
-]
-
-[[package]]
-name = "alloy-sol-macro-input"
-version = "0.7.7"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "2e482dc33a32b6fadbc0f599adea520bd3aaa585c141a80b404d0a3e3fa72528"
-dependencies = [
- "const-hex",
- "dunce",
- "heck 0.5.0",
- "proc-macro2",
- "quote",
- "syn 2.0.106",
- "syn-solidity",
-]
-
-[[package]]
-name = "alloy-sol-types"
-version = "0.7.7"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "a91ca40fa20793ae9c3841b83e74569d1cc9af29a2f5237314fd3452d51e38c7"
-dependencies = [
- "alloy-primitives",
- "alloy-sol-macro",
- "const-hex",
- "serde",
-]
-
-[[package]]
 name = "amq-protocol"
 version = "7.2.3"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -945,23 +886,7 @@ checksum = "c08606f8c3cbf4ce6ec8e28fb0014a2c086708fe954eaa885384a6165172e7e8"
 [[package]]
 name = "axelar-core-std"
 version = "1.0.0"
-source = "git+https://github.com/commonprefix/axelar-amplifier?branch=fix%2Fnon-unique-unsigned-tx-hash#dc7d584277ee9be0fb6601f26fce7c40896619b1"
-dependencies = [
- "axelar-wasm-std",
- "client",
- "cosmwasm-std",
- "error-stack 0.4.1",
- "router-api",
- "schemars 0.8.22",
- "serde",
- "serde_json",
- "thiserror 1.0.69",
-]
-
-[[package]]
-name = "axelar-core-std"
-version = "1.0.0"
-source = "git+https://github.com/commonprefix/axelar-amplifier?branch=xrpl#6d7337236e1c4d0c434d2d156f8a38fb1af2d7de"
+source = "git+https://github.com/axelarnetwork/axelar-amplifier?branch=main#73c655301ae96e1afd80f20680af203bc9d3c573"
 dependencies = [
  "axelar-wasm-std",
  "client",
@@ -977,12 +902,13 @@ dependencies = [
 [[package]]
 name = "axelar-wasm-std"
 version = "1.0.0"
-source = "git+https://github.com/commonprefix/axelar-amplifier?branch=fix%2Fnon-unique-unsigned-tx-hash#dc7d584277ee9be0fb6601f26fce7c40896619b1"
+source = "git+https://github.com/axelarnetwork/axelar-amplifier?branch=main#73c655301ae96e1afd80f20680af203bc9d3c573"
 dependencies = [
  "alloy-primitives",
  "axelar-wasm-std-derive",
  "bech32",
  "bs58",
+ "const-str",
  "cosmwasm-schema",
  "cosmwasm-std",
  "cw-storage-plus",
@@ -994,7 +920,7 @@ dependencies = [
  "lazy_static",
  "num-traits",
  "regex",
- "report 1.0.0 (git+https://github.com/commonprefix/axelar-amplifier?branch=fix%2Fnon-unique-unsigned-tx-hash)",
+ "report",
  "schemars 0.8.22",
  "semver 1.0.26",
  "serde",
@@ -1012,7 +938,7 @@ dependencies = [
 [[package]]
 name = "axelar-wasm-std-derive"
 version = "1.0.0"
-source = "git+https://github.com/commonprefix/axelar-amplifier?branch=fix%2Fnon-unique-unsigned-tx-hash#dc7d584277ee9be0fb6601f26fce7c40896619b1"
+source = "git+https://github.com/axelarnetwork/axelar-amplifier?branch=main#73c655301ae96e1afd80f20680af203bc9d3c573"
 dependencies = [
  "cosmwasm-std",
  "error-stack 0.4.1",
@@ -1020,7 +946,7 @@ dependencies = [
  "itertools 0.14.0",
  "proc-macro2",
  "quote",
- "report 1.0.0 (git+https://github.com/commonprefix/axelar-amplifier?branch=fix%2Fnon-unique-unsigned-tx-hash)",
+ "report",
  "semver 1.0.26",
  "syn 2.0.106",
  "thiserror 1.0.69",
@@ -1029,9 +955,9 @@ dependencies = [
 [[package]]
 name = "axelarnet-gateway"
 version = "1.0.0"
-source = "git+https://github.com/commonprefix/axelar-amplifier?branch=fix%2Fnon-unique-unsigned-tx-hash#dc7d584277ee9be0fb6601f26fce7c40896619b1"
+source = "git+https://github.com/axelarnetwork/axelar-amplifier?branch=main#73c655301ae96e1afd80f20680af203bc9d3c573"
 dependencies = [
- "axelar-core-std 1.0.0 (git+https://github.com/commonprefix/axelar-amplifier?branch=fix%2Fnon-unique-unsigned-tx-hash)",
+ "axelar-core-std",
  "axelar-wasm-std",
  "client",
  "cosmwasm-schema",
@@ -1040,33 +966,10 @@ dependencies = [
  "cw2",
  "error-stack 0.4.1",
  "itertools 0.14.0",
- "msgs-derive 1.0.0 (git+https://github.com/commonprefix/axelar-amplifier?branch=fix%2Fnon-unique-unsigned-tx-hash)",
- "report 1.0.0 (git+https://github.com/commonprefix/axelar-amplifier?branch=fix%2Fnon-unique-unsigned-tx-hash)",
+ "msgs-derive",
+ "report",
  "router-api",
  "semver 1.0.26",
- "serde",
- "serde_json",
- "sha3",
- "thiserror 1.0.69",
-]
-
-[[package]]
-name = "axelarnet-gateway"
-version = "1.0.0"
-source = "git+https://github.com/commonprefix/axelar-amplifier?branch=xrpl#6d7337236e1c4d0c434d2d156f8a38fb1af2d7de"
-dependencies = [
- "axelar-core-std 1.0.0 (git+https://github.com/commonprefix/axelar-amplifier?branch=xrpl)",
- "axelar-wasm-std",
- "client",
- "cosmwasm-schema",
- "cosmwasm-std",
- "cw-storage-plus",
- "cw2",
- "error-stack 0.4.1",
- "itertools 0.11.0",
- "msgs-derive 1.0.0 (git+https://github.com/commonprefix/axelar-amplifier?branch=xrpl)",
- "report 1.0.0 (git+https://github.com/commonprefix/axelar-amplifier?branch=xrpl)",
- "router-api",
  "serde",
  "serde_json",
  "sha3",
@@ -1102,12 +1005,6 @@ name = "base16ct"
 version = "0.2.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "4c7f02d4ea65f2c1853089ffd8d2787bdbc63de2f0d29dedbcf8ccdfa0ccd4cf"
-
-[[package]]
-name = "base32"
-version = "0.4.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "23ce669cd6c8588f79e15cf450314f9638f967fc5770ff1c7c1deb0925ea7cfa"
 
 [[package]]
 name = "base64"
@@ -1417,6 +1314,17 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "613afe47fcd5fac7ccf1db93babcb082c5994d996f20b8b159f2ad1658eb5724"
 
 [[package]]
+name = "cfg_eval"
+version = "0.1.2"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "45565fc9416b9896014f5732ac776f810ee53a66730c17e4020c3ec064a8f88f"
+dependencies = [
+ "proc-macro2",
+ "quote",
+ "syn 2.0.106",
+]
+
+[[package]]
 name = "chrono"
 version = "0.4.42"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -1443,7 +1351,7 @@ dependencies = [
 [[package]]
 name = "client"
 version = "1.0.0"
-source = "git+https://github.com/commonprefix/axelar-amplifier?branch=fix%2Fnon-unique-unsigned-tx-hash#dc7d584277ee9be0fb6601f26fce7c40896619b1"
+source = "git+https://github.com/axelarnetwork/axelar-amplifier?branch=main#73c655301ae96e1afd80f20680af203bc9d3c573"
 dependencies = [
  "cosmwasm-std",
  "error-stack 0.4.1",
@@ -2128,12 +2036,6 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "1435fa1053d8b2fbbe9be7e97eca7f33d37b28409959813daefc1446a14247f1"
 
 [[package]]
-name = "dunce"
-version = "1.0.5"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "92773504d58c093f6de2459af4af33faa518c13451eb8f2b5698ed3d36e7c813"
-
-[[package]]
 name = "dyn-clone"
 version = "1.0.20"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -2332,6 +2234,12 @@ dependencies = [
  "home",
  "windows-sys 0.59.0",
 ]
+
+[[package]]
+name = "ethnum"
+version = "1.5.2"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "ca81e6b4777c89fd810c25a4be2b1bd93ea034fbe58e6a75216a34c6b82c539b"
 
 [[package]]
 name = "event-listener"
@@ -3367,41 +3275,12 @@ dependencies = [
 
 [[package]]
 name = "interchain-token-service"
-version = "1.1.0"
-source = "git+https://github.com/commonprefix/axelar-amplifier?branch=xrpl#6d7337236e1c4d0c434d2d156f8a38fb1af2d7de"
-dependencies = [
- "alloy-primitives",
- "alloy-sol-types",
- "axelar-core-std 1.0.0 (git+https://github.com/commonprefix/axelar-amplifier?branch=xrpl)",
- "axelar-wasm-std",
- "axelarnet-gateway 1.0.0 (git+https://github.com/commonprefix/axelar-amplifier?branch=xrpl)",
- "client",
- "cosmwasm-schema",
- "cosmwasm-std",
- "cw-storage-plus",
- "cw2",
- "error-stack 0.4.1",
- "hex",
- "itertools 0.11.0",
- "msgs-derive 1.0.0 (git+https://github.com/commonprefix/axelar-amplifier?branch=xrpl)",
- "report 1.0.0 (git+https://github.com/commonprefix/axelar-amplifier?branch=xrpl)",
- "router-api",
- "schemars 0.8.22",
- "serde",
- "serde_json",
- "sha3",
- "strum",
- "thiserror 1.0.69",
-]
-
-[[package]]
-name = "interchain-token-service"
 version = "1.3.0"
-source = "git+https://github.com/commonprefix/axelar-amplifier?branch=fix%2Fnon-unique-unsigned-tx-hash#dc7d584277ee9be0fb6601f26fce7c40896619b1"
+source = "git+https://github.com/axelarnetwork/axelar-amplifier?branch=main#73c655301ae96e1afd80f20680af203bc9d3c573"
 dependencies = [
- "axelar-core-std 1.0.0 (git+https://github.com/commonprefix/axelar-amplifier?branch=fix%2Fnon-unique-unsigned-tx-hash)",
+ "axelar-core-std",
  "axelar-wasm-std",
- "axelarnet-gateway 1.0.0 (git+https://github.com/commonprefix/axelar-amplifier?branch=fix%2Fnon-unique-unsigned-tx-hash)",
+ "axelarnet-gateway",
  "client",
  "cosmwasm-schema",
  "cosmwasm-std",
@@ -3412,8 +3291,8 @@ dependencies = [
  "interchain-token-service-std",
  "itertools 0.11.0",
  "its-msg-translator-api",
- "msgs-derive 1.0.0 (git+https://github.com/commonprefix/axelar-amplifier?branch=fix%2Fnon-unique-unsigned-tx-hash)",
- "report 1.0.0 (git+https://github.com/commonprefix/axelar-amplifier?branch=fix%2Fnon-unique-unsigned-tx-hash)",
+ "msgs-derive",
+ "report",
  "router-api",
  "schemars 0.8.22",
  "semver 1.0.26",
@@ -3427,7 +3306,7 @@ dependencies = [
 [[package]]
 name = "interchain-token-service-std"
 version = "1.0.0"
-source = "git+https://github.com/commonprefix/axelar-amplifier?branch=fix%2Fnon-unique-unsigned-tx-hash#dc7d584277ee9be0fb6601f26fce7c40896619b1"
+source = "git+https://github.com/axelarnetwork/axelar-amplifier?branch=main#73c655301ae96e1afd80f20680af203bc9d3c573"
 dependencies = [
  "axelar-wasm-std",
  "client",
@@ -3436,7 +3315,7 @@ dependencies = [
  "cw-storage-plus",
  "error-stack 0.4.1",
  "hex",
- "report 1.0.0 (git+https://github.com/commonprefix/axelar-amplifier?branch=fix%2Fnon-unique-unsigned-tx-hash)",
+ "report",
  "router-api",
  "schemars 0.8.22",
  "strum",
@@ -3446,11 +3325,11 @@ dependencies = [
 [[package]]
 name = "into-inner-derive"
 version = "1.0.0"
-source = "git+https://github.com/commonprefix/axelar-amplifier?branch=fix%2Fnon-unique-unsigned-tx-hash#dc7d584277ee9be0fb6601f26fce7c40896619b1"
+source = "git+https://github.com/axelarnetwork/axelar-amplifier?branch=main#73c655301ae96e1afd80f20680af203bc9d3c573"
 dependencies = [
  "error-stack 0.4.1",
  "quote",
- "report 1.0.0 (git+https://github.com/commonprefix/axelar-amplifier?branch=fix%2Fnon-unique-unsigned-tx-hash)",
+ "report",
  "syn 2.0.106",
  "thiserror 1.0.69",
 ]
@@ -3529,7 +3408,7 @@ checksum = "4a5f13b858c8d314ee3e8f639011f7ccefe71f97f96e50151fb991f267928e2c"
 [[package]]
 name = "its-msg-translator-api"
 version = "1.0.0"
-source = "git+https://github.com/commonprefix/axelar-amplifier?branch=fix%2Fnon-unique-unsigned-tx-hash#dc7d584277ee9be0fb6601f26fce7c40896619b1"
+source = "git+https://github.com/axelarnetwork/axelar-amplifier?branch=main#73c655301ae96e1afd80f20680af203bc9d3c573"
 dependencies = [
  "client",
  "cosmwasm-schema",
@@ -3939,7 +3818,7 @@ dependencies = [
 [[package]]
 name = "msgs-derive"
 version = "1.0.0"
-source = "git+https://github.com/commonprefix/axelar-amplifier?branch=fix%2Fnon-unique-unsigned-tx-hash#dc7d584277ee9be0fb6601f26fce7c40896619b1"
+source = "git+https://github.com/axelarnetwork/axelar-amplifier?branch=main#73c655301ae96e1afd80f20680af203bc9d3c573"
 dependencies = [
  "axelar-wasm-std",
  "cosmwasm-schema",
@@ -3949,28 +3828,15 @@ dependencies = [
  "proc-macro2",
  "quote",
  "serde",
+ "serde_json",
  "syn 2.0.106",
  "thiserror 1.0.69",
 ]
 
 [[package]]
-name = "msgs-derive"
-version = "1.0.0"
-source = "git+https://github.com/commonprefix/axelar-amplifier?branch=xrpl#6d7337236e1c4d0c434d2d156f8a38fb1af2d7de"
-dependencies = [
- "axelar-wasm-std",
- "cosmwasm-std",
- "error-stack 0.4.1",
- "itertools 0.11.0",
- "proc-macro2",
- "quote",
- "syn 2.0.106",
-]
-
-[[package]]
 name = "multisig"
-version = "2.1.0"
-source = "git+https://github.com/commonprefix/axelar-amplifier?branch=fix%2Fnon-unique-unsigned-tx-hash#dc7d584277ee9be0fb6601f26fce7c40896619b1"
+version = "2.3.1"
+source = "git+https://github.com/axelarnetwork/axelar-amplifier?branch=main#73c655301ae96e1afd80f20680af203bc9d3c573"
 dependencies = [
  "axelar-wasm-std",
  "client",
@@ -3986,8 +3852,8 @@ dependencies = [
  "getrandom 0.2.16",
  "itertools 0.11.0",
  "k256",
- "msgs-derive 1.0.0 (git+https://github.com/commonprefix/axelar-amplifier?branch=fix%2Fnon-unique-unsigned-tx-hash)",
- "report 1.0.0 (git+https://github.com/commonprefix/axelar-amplifier?branch=fix%2Fnon-unique-unsigned-tx-hash)",
+ "msgs-derive",
+ "report",
  "rewards",
  "router-api",
  "semver 1.0.26",
@@ -4716,30 +4582,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "proc-macro-error"
-version = "1.0.4"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "da25490ff9892aab3fcf7c36f08cfb902dd3e71ca0f9f9517bea02a73a5ce38c"
-dependencies = [
- "proc-macro-error-attr",
- "proc-macro2",
- "quote",
- "syn 1.0.109",
- "version_check",
-]
-
-[[package]]
-name = "proc-macro-error-attr"
-version = "1.0.4"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "a1be40180e52ecc98ad80b184934baf3d0d29f979574e439af5a55274b35f869"
-dependencies = [
- "proc-macro2",
- "quote",
- "version_check",
-]
-
-[[package]]
 name = "proc-macro2"
 version = "1.0.101"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -5093,7 +4935,7 @@ dependencies = [
  "futures",
  "hex",
  "httpmock",
- "interchain-token-service 1.1.0",
+ "interchain-token-service",
  "lapin",
  "log",
  "mockall",
@@ -5142,28 +4984,17 @@ dependencies = [
 [[package]]
 name = "report"
 version = "1.0.0"
-source = "git+https://github.com/commonprefix/axelar-amplifier?branch=fix%2Fnon-unique-unsigned-tx-hash#dc7d584277ee9be0fb6601f26fce7c40896619b1"
+source = "git+https://github.com/axelarnetwork/axelar-amplifier?branch=main#73c655301ae96e1afd80f20680af203bc9d3c573"
 dependencies = [
  "error-stack 0.4.1",
  "eyre",
  "itertools 0.14.0",
+ "temp-env",
  "thiserror 1.0.69",
  "tracing",
  "tracing-core",
  "tracing-error",
  "tracing-subscriber",
- "valuable",
-]
-
-[[package]]
-name = "report"
-version = "1.0.0"
-source = "git+https://github.com/commonprefix/axelar-amplifier?branch=xrpl#6d7337236e1c4d0c434d2d156f8a38fb1af2d7de"
-dependencies = [
- "error-stack 0.4.1",
- "eyre",
- "itertools 0.11.0",
- "thiserror 1.0.69",
  "valuable",
 ]
 
@@ -5276,17 +5107,17 @@ dependencies = [
 [[package]]
 name = "rewards"
 version = "1.2.0"
-source = "git+https://github.com/commonprefix/axelar-amplifier?branch=fix%2Fnon-unique-unsigned-tx-hash#dc7d584277ee9be0fb6601f26fce7c40896619b1"
+source = "git+https://github.com/axelarnetwork/axelar-amplifier?branch=main#73c655301ae96e1afd80f20680af203bc9d3c573"
 dependencies = [
  "axelar-wasm-std",
+ "client",
  "cosmwasm-schema",
  "cosmwasm-std",
  "cw-storage-plus",
  "cw2",
  "error-stack 0.4.1",
  "itertools 0.11.0",
- "msgs-derive 1.0.0 (git+https://github.com/commonprefix/axelar-amplifier?branch=fix%2Fnon-unique-unsigned-tx-hash)",
- "report 1.0.0 (git+https://github.com/commonprefix/axelar-amplifier?branch=fix%2Fnon-unique-unsigned-tx-hash)",
+ "msgs-derive",
  "router-api",
  "semver 1.0.26",
  "serde_json",
@@ -5390,7 +5221,7 @@ dependencies = [
 [[package]]
 name = "router-api"
 version = "1.0.0"
-source = "git+https://github.com/commonprefix/axelar-amplifier?branch=fix%2Fnon-unique-unsigned-tx-hash#dc7d584277ee9be0fb6601f26fce7c40896619b1"
+source = "git+https://github.com/axelarnetwork/axelar-amplifier?branch=main#73c655301ae96e1afd80f20680af203bc9d3c573"
 dependencies = [
  "axelar-wasm-std",
  "client",
@@ -5400,8 +5231,8 @@ dependencies = [
  "cw-storage-plus",
  "error-stack 0.4.1",
  "flagset",
- "msgs-derive 1.0.0 (git+https://github.com/commonprefix/axelar-amplifier?branch=fix%2Fnon-unique-unsigned-tx-hash)",
- "report 1.0.0 (git+https://github.com/commonprefix/axelar-amplifier?branch=fix%2Fnon-unique-unsigned-tx-hash)",
+ "msgs-derive",
+ "report",
  "schemars 0.8.22",
  "serde",
  "serde_json",
@@ -6183,11 +6014,14 @@ dependencies = [
 [[package]]
 name = "signature-verifier-api"
 version = "1.0.0"
-source = "git+https://github.com/commonprefix/axelar-amplifier?branch=fix%2Fnon-unique-unsigned-tx-hash#dc7d584277ee9be0fb6601f26fce7c40896619b1"
+source = "git+https://github.com/axelarnetwork/axelar-amplifier?branch=main#73c655301ae96e1afd80f20680af203bc9d3c573"
 dependencies = [
+ "axelar-wasm-std",
+ "client",
  "cosmwasm-schema",
  "cosmwasm-std",
  "error-stack 0.4.1",
+ "msgs-derive",
  "thiserror 1.0.69",
 ]
 
@@ -6482,7 +6316,7 @@ checksum = "a8f112729512f8e442d81f95a8a7ddf2b7c6b8a1a6f509a95864142b30cab2d3"
 [[package]]
 name = "starknet-checked-felt"
 version = "1.0.0"
-source = "git+https://github.com/commonprefix/axelar-amplifier?branch=fix%2Fnon-unique-unsigned-tx-hash#dc7d584277ee9be0fb6601f26fce7c40896619b1"
+source = "git+https://github.com/axelarnetwork/axelar-amplifier?branch=main#73c655301ae96e1afd80f20680af203bc9d3c573"
 dependencies = [
  "alloy-primitives",
  "error-stack 0.4.1",
@@ -6516,24 +6350,26 @@ checksum = "a2eb9349b6444b326872e140eb1cf5e7c522154d69e7a0ffb0fb81c06b37543f"
 
 [[package]]
 name = "stellar-strkey"
-version = "0.0.8"
+version = "0.0.13"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "12d2bf45e114117ea91d820a846fd1afbe3ba7d717988fee094ce8227a3bf8bd"
+checksum = "ee1832fb50c651ad10f734aaf5d31ca5acdfb197a6ecda64d93fcdb8885af913"
 dependencies = [
- "base32",
  "crate-git-revision",
- "thiserror 1.0.69",
+ "data-encoding",
 ]
 
 [[package]]
 name = "stellar-xdr"
-version = "21.2.0"
+version = "23.0.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "2675a71212ed39a806e415b0dbf4702879ff288ec7f5ee996dda42a135512b50"
+checksum = "89d2848e1694b0c8db81fd812bfab5ea71ee28073e09ccc45620ef3cf7a75a9b"
 dependencies = [
+ "cfg_eval",
  "crate-git-revision",
  "escape-bytes",
+ "ethnum",
  "hex",
+ "sha2 0.10.9",
  "stellar-strkey",
 ]
 
@@ -6620,7 +6456,7 @@ checksum = "13c2bddecc57b384dee18652358fb23172facb8a2c51ccc10d74c157bdea3292"
 [[package]]
 name = "sui-types"
 version = "1.0.0"
-source = "git+https://github.com/commonprefix/axelar-amplifier?branch=fix%2Fnon-unique-unsigned-tx-hash#dc7d584277ee9be0fb6601f26fce7c40896619b1"
+source = "git+https://github.com/axelarnetwork/axelar-amplifier?branch=main#73c655301ae96e1afd80f20680af203bc9d3c573"
 dependencies = [
  "error-stack 0.4.1",
  "hex",
@@ -6648,18 +6484,6 @@ dependencies = [
  "proc-macro2",
  "quote",
  "unicode-ident",
-]
-
-[[package]]
-name = "syn-solidity"
-version = "0.7.7"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "c837dc8852cb7074e46b444afb81783140dab12c58867b49fb3898fbafedf7ea"
-dependencies = [
- "paste",
- "proc-macro2",
- "quote",
- "syn 2.0.106",
 ]
 
 [[package]]
@@ -6719,6 +6543,15 @@ dependencies = [
  "p12-keystore",
  "rustls-connector",
  "rustls-pemfile",
+]
+
+[[package]]
+name = "temp-env"
+version = "0.3.6"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "96374855068f47402c3121c6eed88d29cb1de8f3ab27090e273e420bdabcf050"
+dependencies = [
+ "parking_lot 0.12.4",
 ]
 
 [[package]]
@@ -8029,7 +7862,7 @@ dependencies = [
 [[package]]
 name = "xrpl-types"
 version = "1.0.0"
-source = "git+https://github.com/commonprefix/axelar-amplifier?branch=fix%2Fnon-unique-unsigned-tx-hash#dc7d584277ee9be0fb6601f26fce7c40896619b1"
+source = "git+https://github.com/axelarnetwork/axelar-amplifier?branch=main#73c655301ae96e1afd80f20680af203bc9d3c573"
 dependencies = [
  "axelar-wasm-std",
  "bs58",
@@ -8038,7 +7871,7 @@ dependencies = [
  "cw-storage-plus",
  "error-stack 0.4.1",
  "hex",
- "interchain-token-service 1.3.0",
+ "interchain-token-service",
  "k256",
  "lazy_static",
  "multisig",

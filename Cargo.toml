@@ -15,11 +15,11 @@ tracing-subscriber = "0.3.18"
 xrpl_api = { git = "https://github.com/commonprefix/xrpl-sdk-rust", branch = "main", package = "xrpl_api" }
 xrpl_types = { git = "https://github.com/commonprefix/xrpl-sdk-rust", branch = "main", package = "xrpl_types" }
 xrpl_http_client = { git = "https://github.com/commonprefix/xrpl-sdk-rust", branch = "main", package = "xrpl_http_client" }
-xrpl_amplifier_types = { git = "https://github.com/commonprefix/axelar-amplifier", branch = "fix/non-unique-unsigned-tx-hash", package = "xrpl-types" }
-axelar-wasm-std = { git = "https://github.com/commonprefix/axelar-amplifier", branch = "fix/non-unique-unsigned-tx-hash", package = "axelar-wasm-std" }
-router_api = { git = "https://github.com/commonprefix/axelar-amplifier", branch = "fix/non-unique-unsigned-tx-hash", package = "router-api" }
-multisig = { git = "https://github.com/commonprefix/axelar-amplifier", branch = "fix/non-unique-unsigned-tx-hash", package = "multisig" }
-interchain-token-service = { git = "https://github.com/commonprefix/axelar-amplifier", branch = "xrpl", package = "interchain-token-service" }
+xrpl_amplifier_types = { git = "https://github.com/axelarnetwork/axelar-amplifier", branch = "main", package = "xrpl-types" }
+axelar-wasm-std = { git = "https://github.com/axelarnetwork/axelar-amplifier", branch = "main", package = "axelar-wasm-std" }
+router_api = { git = "https://github.com/axelarnetwork/axelar-amplifier", branch = "main", package = "router-api" }
+multisig = { git = "https://github.com/axelarnetwork/axelar-amplifier", branch = "main", package = "multisig" }
+interchain-token-service = { git = "https://github.com/axelarnetwork/axelar-amplifier", branch = "main", package = "interchain-token-service" }
 hex = "0.4.3"
 reqwest = { version = "0.12.9", features = ["native-tls"] }
 thiserror = "2.0.3"
