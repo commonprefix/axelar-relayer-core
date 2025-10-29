@@ -73,20 +73,12 @@ where
 
 #[async_trait]
 pub trait IncluderTrait {
-    async fn handle_execute_task(
-        &self,
-        task: ExecuteTask,
-    ) -> Result<ExecuteTaskEvents, IncluderError>;
+    async fn handle_execute_task(&self, task: ExecuteTask) -> Result<Vec<Event>, IncluderError>;
     async fn handle_gateway_tx_task(
         &self,
         task: GatewayTxTask,
     ) -> Result<Vec<Event>, IncluderError>;
     async fn handle_refund_task(&self, task: RefundTask) -> Result<(), IncluderError>;
-}
-
-pub struct ExecuteTaskEvents {
-    pub cannot_execute_events: Vec<Event>,
-    pub reverted_events: Vec<Event>,
 }
 
 #[async_trait]
@@ -106,12 +98,7 @@ where
                     info!("Consuming execute task: {:?}", execute_task);
                     let events = self.includer.handle_execute_task(execute_task).await?;
                     self.gmp_api
-                        .post_events(events.cannot_execute_events)
-                        .await
-                        .map_err(|e| IncluderError::ConsumerError(e.to_string()))?;
-
-                    self.gmp_api
-                        .post_events(events.reverted_events)
+                        .post_events(events)
                         .await
                         .map_err(|e| IncluderError::ConsumerError(e.to_string()))?;
 
