@@ -243,23 +243,16 @@ where
     }
 
     #[tracing::instrument(skip(self))]
-    async fn cannot_execute_message(
+    fn cannot_execute_message(
         &self,
         id: String,
         message_id: String,
         source_chain: String,
         details: String,
         reason: CannotExecuteMessageReason,
-    ) -> Result<Event, GmpApiError> {
-        let cannot_execute_message_event = self.gmp_api.map_cannot_execute_message_to_event(
-            id,
-            message_id,
-            source_chain,
-            details,
-            reason,
-        );
-
-        Ok(cannot_execute_message_event)
+    ) -> Event {
+        self.gmp_api
+            .cannot_execute_message(id, message_id, source_chain, details, reason)
     }
 
     #[tracing::instrument(skip(self))]
@@ -591,7 +584,7 @@ mod tests {
                 eq(CannotExecuteMessageReason::InsufficientGas),
             )
             .returning(|id, message_id, source_chain, details, reason| {
-                Ok(Event::CannotExecuteMessageV2 {
+                Event::CannotExecuteMessageV2 {
                     common: CommonEventFields {
                         r#type: "CANNOT_EXECUTE_MESSAGE/V2".to_owned(),
                         event_id: format!("cannot-execute-task-v2-{}", id), // Fixed: use the actual id parameter
@@ -601,7 +594,7 @@ mod tests {
                     source_chain,
                     reason,
                     details,
-                })
+                }
             });
 
         mock_gmp_api
@@ -688,15 +681,24 @@ mod tests {
         assert!(result.is_ok());
         assert_eq!(result.unwrap(), "payload_data");
 
-        let result = decorator
-            .cannot_execute_message(
-                "id123".to_string(),
-                "message123".to_string(),
-                "source123".to_string(),
-                "details123".to_string(),
-                CannotExecuteMessageReason::InsufficientGas,
-            )
-            .await;
-        assert!(result.is_ok());
+        let result = decorator.cannot_execute_message(
+            "id123".to_string(),
+            "message123".to_string(),
+            "source123".to_string(),
+            "details123".to_string(),
+            CannotExecuteMessageReason::InsufficientGas,
+        );
+        let expected_event = Event::CannotExecuteMessageV2 {
+            common: CommonEventFields {
+                r#type: "CANNOT_EXECUTE_MESSAGE/V2".to_owned(),
+                event_id: "cannot-execute-task-v2-id123".to_string(),
+                meta: None,
+            },
+            message_id: "message123".to_string(),
+            source_chain: "source123".to_string(),
+            reason: CannotExecuteMessageReason::InsufficientGas,
+            details: "details123".to_string(),
+        };
+        assert_eq!(result, expected_event);
     }
 }

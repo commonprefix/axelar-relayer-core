@@ -519,7 +519,7 @@ impl Queue {
 #[async_trait]
 impl QueueTrait for Queue {
     async fn publish(&self, item: QueueItem) {
-        Queue::publish(self, item).await;
+        self.publish(item).await;
     }
 
     async fn republish(
@@ -527,14 +527,14 @@ impl QueueTrait for Queue {
         delivery: Delivery,
         force_requeue: bool,
     ) -> Result<(), anyhow::Error> {
-        Queue::republish(self, delivery, force_requeue).await
+        self.republish(delivery, force_requeue).await
     }
 
     async fn consumer(&self) -> Result<Consumer, anyhow::Error> {
-        Queue::consumer(self).await
+        self.consumer().await
     }
 
     async fn close(&self) {
-        Queue::close(self).await;
+        self.close().await;
     }
 }
