@@ -10,7 +10,7 @@ async fn main() {
     use relayer_core::lock_manager::{LockManager, RedisLockManager};
 
     let client = redis::Client::open("redis://127.0.0.1/").unwrap();
-    let conn = connection_manager(client, None, None, None).await.unwrap();
+    let conn = connection_manager(client, None, None, None, None).await.unwrap();
     let manager = RedisLockManager::new(conn);
 
     let lock = manager.lock("key").await;
@@ -116,7 +116,8 @@ mod tests {
             client,
             Some(Duration::from_millis(100)),
             Some(Duration::from_millis(100)),
-            Some(5),
+            Some(2),
+            Some(500),
         )
         .await
         .unwrap();
