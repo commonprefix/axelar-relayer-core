@@ -25,7 +25,7 @@ async fn main() -> anyhow::Result<()> {
     let payload_cache = PayloadCache::new(postgres_db);
 
     let redis_client = redis::Client::open(config.redis_server.clone())?;
-    let redis_conn = connection_manager(redis_client.clone(), None, None, None).await?;
+    let redis_conn = connection_manager(redis_client.clone(), None, None, None, None).await?;
 
     let proof_retrier = ProofRetrier::new(
         payload_cache,
