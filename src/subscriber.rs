@@ -1,4 +1,4 @@
-use crate::queue::{Queue, QueueItem};
+use crate::queue::{QueueItem, QueueTrait};
 use futures::Stream;
 use std::{future::Future, pin::Pin, sync::Arc};
 use tracing::{debug, error, info, info_span, Instrument};
@@ -59,7 +59,7 @@ where
         Self { transaction_poller }
     }
 
-    async fn work(&mut self, account: TP::Account, queue: Arc<Queue>)
+    async fn work(&mut self, account: TP::Account, queue: Arc<dyn QueueTrait>)
     where
         <TP as TransactionPoller>::Transaction: 'static,
         <TP as TransactionPoller>::Account: 'static,
@@ -96,7 +96,7 @@ where
         tokio::time::sleep(tokio::time::Duration::from_secs(2)).await
     }
 
-    pub async fn run(&mut self, account: TP::Account, queue: Arc<Queue>)
+    pub async fn run(&mut self, account: TP::Account, queue: Arc<dyn QueueTrait>)
     where
         <TP as TransactionPoller>::Transaction: 'static,
         <TP as TransactionPoller>::Account: 'static,
@@ -106,7 +106,7 @@ where
         }
     }
 
-    pub async fn recover_txs(&mut self, txs: Vec<String>, queue: Arc<Queue>) {
+    pub async fn recover_txs(&mut self, txs: Vec<String>, queue: Arc<dyn QueueTrait>) {
         let span = info_span!("recover_txs");
 
         for tx in txs {

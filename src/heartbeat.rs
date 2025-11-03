@@ -9,7 +9,7 @@ pub async fn heartbeats_loop(common_config: &Config) -> ! {
 
     let redis_client = redis::Client::open(common_config.redis_server.clone())
         .expect("Failed to connect to redis server");
-    let mut redis_conn = connection_manager(redis_client, None, None, None)
+    let mut redis_conn = connection_manager(redis_client, None, None, None, None)
         .await
         .expect("Failed to connect to redis server");
 

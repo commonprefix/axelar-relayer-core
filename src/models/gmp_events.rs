@@ -17,8 +17,8 @@ pub struct EventModel {
     pub _updated_at: Option<chrono::DateTime<chrono::Utc>>,
 }
 
-impl EventModel {
-    pub fn from_event(event: Event) -> Self {
+impl From<Event> for EventModel {
+    fn from(event: Event) -> Self {
         let (event_id, event_type, message_id) = match &event {
             Event::GasRefunded {
                 common, message_id, ..
@@ -175,7 +175,7 @@ mod tests {
         let event_type = "GAS_REFUNDED".to_string();
         let message_id = "message123".to_string();
 
-        let model = EventModel::from_event(event);
+        let model = EventModel::from(event);
 
         assert_eq!(model.event_id, event_id);
         assert_eq!(model.event_type, event_type);
@@ -189,7 +189,7 @@ mod tests {
         let event_type = "GAS_CREDIT".to_string();
         let message_id = "message123".to_string();
 
-        let model = EventModel::from_event(event);
+        let model = EventModel::from(event);
 
         assert_eq!(model.event_id, event_id);
         assert_eq!(model.event_type, event_type);
@@ -203,7 +203,7 @@ mod tests {
         let event_type = "CANNOT_EXECUTE_MESSAGE_V2".to_string();
         let message_id = "message123".to_string();
 
-        let model = EventModel::from_event(event);
+        let model = EventModel::from(event);
 
         assert_eq!(model.event_id, event_id);
         assert_eq!(model.event_type, event_type);
@@ -217,7 +217,7 @@ mod tests {
         let event_type = "ITS_INTERCHAIN_TRANSFER".to_string();
         let message_id = "message123".to_string();
 
-        let model = EventModel::from_event(event);
+        let model = EventModel::from(event);
 
         assert_eq!(model.event_id, event_id);
         assert_eq!(model.event_type, event_type);
@@ -231,7 +231,7 @@ mod tests {
         let event_type = "MESSAGE_EXECUTED".to_string();
         let message_id = "message123".to_string();
 
-        let model = EventModel::from_event(event);
+        let model = EventModel::from(event);
 
         assert_eq!(model.event_id, event_id);
         assert_eq!(model.event_type, event_type);
@@ -245,7 +245,7 @@ mod tests {
         let event_type = "CALL".to_string();
         let message_id = "message123".to_string();
 
-        let model = EventModel::from_event(event);
+        let model = EventModel::from(event);
 
         assert_eq!(model.event_id, event_id);
         assert_eq!(model.event_type, event_type);
@@ -259,7 +259,7 @@ mod tests {
         let event_type = "MESSAGE_APPROVED".to_string();
         let message_id = "message123".to_string();
 
-        let model = EventModel::from_event(event);
+        let model = EventModel::from(event);
 
         assert_eq!(model.event_id, event_id);
         assert_eq!(model.event_type, event_type);
@@ -287,7 +287,7 @@ mod tests {
         let model = PgGMPEvents::new(pool.clone());
 
         let event = fixtures::gas_refunded_event();
-        let event_model = EventModel::from_event(event.clone());
+        let event_model = EventModel::from(event.clone());
 
         model.insert_event(event_model).await.unwrap();
 

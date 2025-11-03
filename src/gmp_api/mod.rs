@@ -17,12 +17,14 @@ use std::{
     time::Duration,
 };
 use tracing::{debug, info, warn};
+use uuid::Uuid;
 use xrpl_amplifier_types::msg::XRPLMessage;
 
 use crate::{config::Config, error::GmpApiError, utils::parse_task};
 use gmp_types::{
     Amount, BroadcastRequest, CannotExecuteMessageReason, CommonEventFields, Event,
-    PostEventResponse, PostEventResult, QueryRequest, StorePayloadResult, Task,
+    MessageExecutionStatus, PostEventResponse, PostEventResult, QueryRequest, StorePayloadResult,
+    Task,
 };
 use reqwest::Identity;
 use reqwest_tracing::TracingMiddleware;
@@ -212,6 +214,11 @@ impl GmpApiTrait for GmpApi {
 
     #[tracing::instrument(skip(self))]
     async fn post_events(&self, events: Vec<Event>) -> Result<Vec<PostEventResult>, GmpApiError> {
+        if events.is_empty() {
+            debug!("No events to post.");
+            return Ok(vec![]);
+        }
+
         let mut map = HashMap::new();
         map.insert("events", events);
 
@@ -438,20 +445,35 @@ impl GmpApiTrait for GmpApi {
         }
     }
 
-    async fn cannot_execute_message(
+    fn execute_message(
+        &self,
+        message_id: String,
+        source_chain: String,
+        status: MessageExecutionStatus,
+        cost: Amount,
+    ) -> Event {
+        Event::MessageExecuted {
+            common: CommonEventFields {
+                r#type: "MESSAGE_EXECUTED".to_owned(),
+                event_id: Uuid::new_v4().to_string(),
+                meta: None,
+            },
+            message_id,
+            source_chain,
+            status,
+            cost,
+        }
+    }
+
+    fn cannot_execute_message(
         &self,
         id: String,
         message_id: String,
         source_chain: String,
         details: String,
         reason: CannotExecuteMessageReason,
-    ) -> Result<(), GmpApiError> {
-        let cannot_execute_message_event =
-            self.map_cannot_execute_message_to_event(id, message_id, source_chain, details, reason);
-
-        self.post_events(vec![cannot_execute_message_event]).await?;
-
-        Ok(())
+    ) -> Event {
+        self.map_cannot_execute_message_to_event(id, message_id, source_chain, details, reason)
     }
 
     async fn its_interchain_transfer(&self, xrpl_message: XRPLMessage) -> Result<(), GmpApiError> {
@@ -509,14 +531,14 @@ pub trait GmpApiTrait {
     ) -> Result<String, GmpApiError>;
     async fn post_payload(&self, payload: &[u8]) -> Result<String, GmpApiError>;
     async fn get_payload(&self, hash: &str) -> Result<String, GmpApiError>;
-    async fn cannot_execute_message(
+    fn cannot_execute_message(
         &self,
         id: String,
         message_id: String,
         source_chain: String,
         details: String,
         reason: CannotExecuteMessageReason,
-    ) -> Result<(), GmpApiError>;
+    ) -> Event;
     async fn its_interchain_transfer(&self, xrpl_message: XRPLMessage) -> Result<(), GmpApiError>;
 
     fn map_cannot_execute_message_to_event(
@@ -526,6 +548,13 @@ pub trait GmpApiTrait {
         source_chain: String,
         details: String,
         reason: CannotExecuteMessageReason,
+    ) -> Event;
+    fn execute_message(
+        &self,
+        message_id: String,
+        source_chain: String,
+        status: MessageExecutionStatus,
+        cost: Amount,
     ) -> Event;
 }
 

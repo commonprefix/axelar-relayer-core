@@ -7,12 +7,13 @@ pub async fn connection_manager(
     conn_timeout: Option<Duration>,
     resp_timeout: Option<Duration>,
     retries: Option<usize>,
+    max_delay: Option<u64>,
 ) -> redis::RedisResult<ConnectionManager> {
     let config = ConnectionManagerConfig::new()
         .set_connection_timeout(conn_timeout.unwrap_or_else(|| Duration::from_secs(2)))
         .set_response_timeout(resp_timeout.unwrap_or_else(|| Duration::from_secs(2)))
         .set_number_of_retries(retries.unwrap_or(2))
-        .set_max_delay(10000); // 1000 = 1 second
+        .set_max_delay(max_delay.unwrap_or(10000)); // 1000 = 1 second
 
     let conn = ConnectionManager::new_with_config(client, config).await?;
     Ok(conn)
@@ -46,6 +47,7 @@ mod tests {
             Some(Duration::from_millis(100)),
             Some(Duration::from_millis(100)),
             Some(2),
+            None,
         )
         .await
         .unwrap();

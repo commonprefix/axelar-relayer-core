@@ -10,6 +10,12 @@ pub enum IncluderError {
     ConsumerError(String),
     #[error("Irrelevant task")]
     IrrelevantTask,
+    #[error("Failed to handle execute task: {0}")]
+    ExecuteTaskError(String),
+    #[error("Failed to handle gateway tx task: {0}")]
+    GatewayTxTaskError(String),
+    #[error("Failed to handle refund task: {0}")]
+    RefundTaskError(String),
     #[error("Generic error: {0}")]
     GenericError(String),
 }
@@ -24,22 +30,6 @@ pub enum RefundManagerError {
     GenericError(String),
 }
 
-#[derive(Error, Debug, PartialEq)]
-pub enum BroadcasterError {
-    #[error("Connection failed: {0}")]
-    ConnectionFailed(String),
-    #[error("RPC Call Failed: {0}")]
-    RPCCallFailed(String),
-    #[error("RPC call failed: {0}")]
-    RPCError(String),
-    #[error("Insufficient gas: {0}")]
-    InsufficientGas(String),
-    #[error("Irrelevant task: {0}")]
-    IrrelevantTask(String),
-    #[error("Generic error: {0}")]
-    GenericError(String),
-}
-
 #[derive(Error, Debug)]
 pub enum ClientError {
     #[error("Connection failed: {0}")]
@@ -48,6 +38,8 @@ pub enum ClientError {
     BadRequest(String),
     #[error("Bad response: {0}")]
     BadResponse(String),
+    #[error("Generic error: {0}")]
+    GenericError(String),
 }
 
 #[derive(Error, Debug, Clone)]

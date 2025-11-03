@@ -8,6 +8,7 @@ pub mod includer;
 pub mod includer_worker;
 pub mod ingestor;
 pub mod ingestor_worker;
+pub mod lock_manager;
 pub mod logging;
 pub mod logging_ctx_cache;
 pub mod models;

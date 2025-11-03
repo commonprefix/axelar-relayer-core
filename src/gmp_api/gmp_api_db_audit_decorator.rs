@@ -44,7 +44,8 @@ async fn create(config: &Config, pg_pool: PgPool) -> anyhow::Result<impl GmpApiT
 use crate::config::Config;
 use crate::error::GmpApiError;
 use crate::gmp_api::gmp_types::{
-    BroadcastRequest, CannotExecuteMessageReason, Event, PostEventResult, QueryRequest, Task,
+    Amount, BroadcastRequest, CannotExecuteMessageReason, Event, MessageExecutionStatus,
+    PostEventResult, QueryRequest, Task,
 };
 use crate::gmp_api::{GmpApi, GmpApiTrait};
 use crate::models::gmp_events::{EventModel, GMPAudit, PgGMPEvents};
@@ -136,7 +137,7 @@ where
     async fn post_events(&self, events: Vec<Event>) -> Result<Vec<PostEventResult>, GmpApiError> {
         let mut event_models = Vec::new();
         for event in &events {
-            let event_model = EventModel::from_event(event.clone());
+            let event_model = EventModel::from(event.clone());
             event_models.push(event_model.clone());
             if let Err(e) = self.gmp_events.insert_event(event_model).await {
                 error!("Failed to save event to database: {:?}", e);
@@ -242,30 +243,32 @@ where
     }
 
     #[tracing::instrument(skip(self))]
-    async fn cannot_execute_message(
+    fn cannot_execute_message(
         &self,
         id: String,
         message_id: String,
         source_chain: String,
         details: String,
         reason: CannotExecuteMessageReason,
-    ) -> Result<(), GmpApiError> {
-        let cannot_execute_message_event = self.gmp_api.map_cannot_execute_message_to_event(
-            id,
-            message_id,
-            source_chain,
-            details,
-            reason,
-        );
-
-        self.post_events(vec![cannot_execute_message_event]).await?;
-
-        Ok(())
+    ) -> Event {
+        self.gmp_api
+            .cannot_execute_message(id, message_id, source_chain, details, reason)
     }
 
     #[tracing::instrument(skip(self))]
     async fn its_interchain_transfer(&self, xrpl_message: XRPLMessage) -> Result<(), GmpApiError> {
         self.gmp_api.its_interchain_transfer(xrpl_message).await
+    }
+
+    fn execute_message(
+        &self,
+        message_id: String,
+        source_chain: String,
+        status: MessageExecutionStatus,
+        cost: Amount,
+    ) -> Event {
+        self.gmp_api
+            .execute_message(message_id, source_chain, status, cost)
     }
 
     fn map_cannot_execute_message_to_event(
@@ -443,7 +446,7 @@ mod tests {
         for result in &results {
             let index = result.index;
             let event = &events[index];
-            let event_model = EventModel::from_event(event.clone());
+            let event_model = EventModel::from(event.clone());
             mock_gmp_events
                 .expect_update_event_response()
                 .with(eq(event_model.event_id), eq(Json(result.clone())))
@@ -580,7 +583,19 @@ mod tests {
                 eq("details123".to_string()),
                 eq(CannotExecuteMessageReason::InsufficientGas),
             )
-            .returning(|_, _, _, _, _| Ok(()));
+            .returning(|id, message_id, source_chain, details, reason| {
+                Event::CannotExecuteMessageV2 {
+                    common: CommonEventFields {
+                        r#type: "CANNOT_EXECUTE_MESSAGE/V2".to_owned(),
+                        event_id: format!("cannot-execute-task-v2-{}", id), // Fixed: use the actual id parameter
+                        meta: None,
+                    },
+                    message_id,
+                    source_chain,
+                    reason,
+                    details,
+                }
+            });
 
         mock_gmp_api
             .expect_its_interchain_transfer()
@@ -666,15 +681,24 @@ mod tests {
         assert!(result.is_ok());
         assert_eq!(result.unwrap(), "payload_data");
 
-        let result = decorator
-            .cannot_execute_message(
-                "id123".to_string(),
-                "message123".to_string(),
-                "source123".to_string(),
-                "details123".to_string(),
-                CannotExecuteMessageReason::InsufficientGas,
-            )
-            .await;
-        assert!(result.is_ok());
+        let result = decorator.cannot_execute_message(
+            "id123".to_string(),
+            "message123".to_string(),
+            "source123".to_string(),
+            "details123".to_string(),
+            CannotExecuteMessageReason::InsufficientGas,
+        );
+        let expected_event = Event::CannotExecuteMessageV2 {
+            common: CommonEventFields {
+                r#type: "CANNOT_EXECUTE_MESSAGE/V2".to_owned(),
+                event_id: "cannot-execute-task-v2-id123".to_string(),
+                meta: None,
+            },
+            message_id: "message123".to_string(),
+            source_chain: "source123".to_string(),
+            reason: CannotExecuteMessageReason::InsufficientGas,
+            details: "details123".to_string(),
+        };
+        assert_eq!(result, expected_event);
     }
 }
