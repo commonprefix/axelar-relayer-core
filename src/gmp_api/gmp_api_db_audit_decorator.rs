@@ -137,7 +137,7 @@ where
     async fn post_events(&self, events: Vec<Event>) -> Result<Vec<PostEventResult>, GmpApiError> {
         let mut event_models = Vec::new();
         for event in &events {
-            let event_model = EventModel::from_event(event.clone());
+            let event_model = EventModel::from(event.clone());
             event_models.push(event_model.clone());
             if let Err(e) = self.gmp_events.insert_event(event_model).await {
                 error!("Failed to save event to database: {:?}", e);
@@ -446,7 +446,7 @@ mod tests {
         for result in &results {
             let index = result.index;
             let event = &events[index];
-            let event_model = EventModel::from_event(event.clone());
+            let event_model = EventModel::from(event.clone());
             mock_gmp_events
                 .expect_update_event_response()
                 .with(eq(event_model.event_id), eq(Json(result.clone())))
