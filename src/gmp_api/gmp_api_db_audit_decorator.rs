@@ -58,11 +58,22 @@ use tokio::spawn;
 use tracing::{error, Instrument, Span};
 use xrpl_amplifier_types::msg::XRPLMessage;
 
-#[derive(Clone)]
 pub struct GmpApiDbAuditDecorator<T: GmpApiTrait, U: GMPTaskAudit, V: GMPAudit> {
     gmp_api: T,
     gmp_tasks: Arc<U>,
     gmp_events: Arc<V>,
+}
+
+impl<T: GmpApiTrait + Clone, U: GMPTaskAudit, V: GMPAudit> Clone
+    for GmpApiDbAuditDecorator<T, U, V>
+{
+    fn clone(&self) -> Self {
+        Self {
+            gmp_api: self.gmp_api.clone(),
+            gmp_tasks: Arc::clone(&self.gmp_tasks),
+            gmp_events: Arc::clone(&self.gmp_events),
+        }
+    }
 }
 
 impl<T: GmpApiTrait, U: GMPTaskAudit, V: GMPAudit> GmpApiDbAuditDecorator<T, U, V> {
