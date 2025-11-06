@@ -20,6 +20,7 @@ use tracing::{debug, info, warn};
 use uuid::Uuid;
 use xrpl_amplifier_types::msg::XRPLMessage;
 
+use crate::utils::ThreadSafe;
 use crate::{config::Config, error::GmpApiError, utils::parse_task};
 use gmp_types::{
     Amount, BroadcastRequest, CannotExecuteMessageReason, CommonEventFields, Event,
@@ -510,7 +511,7 @@ impl GmpApiTrait for GmpApi {
 
 #[cfg_attr(any(test, feature = "mocks"), mockall::automock)]
 #[async_trait]
-pub trait GmpApiTrait {
+pub trait GmpApiTrait: ThreadSafe {
     fn get_chain(&self) -> &str;
     async fn get_tasks_action(&self, after: Option<String>) -> Result<Vec<Task>, GmpApiError>;
     async fn post_events(&self, events: Vec<Event>) -> Result<Vec<PostEventResult>, GmpApiError>;
