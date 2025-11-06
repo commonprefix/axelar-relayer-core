@@ -69,6 +69,10 @@ testcontainers = "0.24.0"
 testcontainers-modules = { version = "0.12.1", features = ["postgres"] }
 
 [[bin]]
+name = "distributor"
+path = "src/bin/distributor.rs"
+
+[[bin]]
 name = "price_feed"
 path = "src/bin/price_feed.rs"
 
