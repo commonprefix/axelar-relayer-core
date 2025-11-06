@@ -508,7 +508,7 @@ impl GmpApiTrait for GmpApi {
     }
 }
 
-#[cfg_attr(test, mockall::automock)]
+#[cfg_attr(any(test, feature = "mocks"), mockall::automock)]
 #[async_trait]
 pub trait GmpApiTrait {
     fn get_chain(&self) -> &str;

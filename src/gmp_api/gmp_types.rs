@@ -521,11 +521,6 @@ pub struct PostEventResponse {
     pub results: Vec<PostEventResult>,
 }
 
-#[derive(Serialize, Deserialize, Debug, Default)]
-struct EventMessage {
-    pub events: Vec<Event>,
-}
-
 #[derive(Serialize, Deserialize, Debug)]
 pub enum BroadcastRequest {
     Generic(Value),
