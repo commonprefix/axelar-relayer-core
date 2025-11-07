@@ -559,6 +559,15 @@ pub trait GmpApiTrait: ThreadSafe {
     ) -> Event;
 }
 
+#[cfg(any(test, feature = "mocks"))]
+impl Clone for MockGmpApiTrait {
+    fn clone(&self) -> Self {
+        let mut mock = Self::new();
+        mock.clone_from(self);
+        mock
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
