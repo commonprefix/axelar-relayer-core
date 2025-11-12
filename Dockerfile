@@ -18,6 +18,7 @@ COPY Cargo.lock ./
 # Create dummy files for each workspace member to cache dependencies
 RUN mkdir -p src/bin/scripts src/bin/recovery && \
     echo 'fn main() {}' > src/bin/price_feed.rs && \
+    echo 'fn main() {}' > src/bin/distributor.rs && \
     echo 'fn main() {}' > src/bin/scripts/queue_migration.rs && \
     echo 'fn main() {}' > src/bin/recovery/proof_retrier.rs && \
     echo 'fn main() {}' > src/bin/recovery/dlq_recovery.rs

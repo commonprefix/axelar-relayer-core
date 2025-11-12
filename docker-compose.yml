@@ -1,4 +1,12 @@
 services:
+  distributor:
+    build:
+      context: .
+      args:
+        BINARY_NAME: distributor
+    env_file:
+      - .env
+
   price_feed:
     build:
       context: .
