@@ -61,7 +61,7 @@ where
             gmp_api,
             refunds_enabled,
             // Sane default as it's the minimum required for the relayer to work
-            supported_includer_tasks: vec![TaskKind::Refund, TaskKind::GatewayTx],
+            supported_includer_tasks: vec![TaskKind::Refund, TaskKind::GatewayTx, TaskKind::Execute],
             supported_ingestor_tasks: vec![
                 TaskKind::Verify,
                 TaskKind::ConstructProof,
