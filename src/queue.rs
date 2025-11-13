@@ -30,7 +30,7 @@ use tokio_util::sync::CancellationToken;
 use tracing::{debug, error, info, warn, Instrument, Span};
 use uuid::Uuid;
 
-use crate::logging::distributed_tracing_headers;
+use crate::logging::{distributed_tracing_headers, maybe_instrument};
 use crate::utils::ThreadSafe;
 use crate::{gmp_api::gmp_types::Task, subscriber::ChainTransaction};
 use async_trait::async_trait;
@@ -114,7 +114,7 @@ impl BufferProcessor {
                         if let Some(queue_item_with_span) = receipt {
                             let item = &queue_item_with_span.item;
                             let span = queue_item_with_span.span.clone();
-                            if let Err(e) = queue.publish_item(item, false, None).instrument(span).await {
+                            if let Err(e) = maybe_instrument(queue.publish_item(item, false, None), span).await {
                                 error!("Failed to publish item: {:?}. Re-buffering.", e);
                                 if let Err(e) = sender.send(queue_item_with_span).await {
                                     error!("Failed to re-buffer item: {:?}", e);
@@ -182,7 +182,7 @@ impl Queue {
         queue_arc
     }
 
-    #[tracing::instrument(skip(self))]
+    #[cfg_attr(feature = "instrumentation", tracing::instrument(skip(self)))]
     pub async fn republish(
         &self,
         delivery: Delivery,
@@ -418,7 +418,7 @@ impl Queue {
         info!("Reconnected to RabbitMQ at {}", self.url);
     }
 
-    #[tracing::instrument(skip(self))]
+    #[cfg_attr(feature = "instrumentation", tracing::instrument(skip(self)))]
     pub async fn publish(&self, item: QueueItem) {
         let span = Span::current();
         let queue_item_with_span = QueueItemWithSpan {
@@ -430,7 +430,7 @@ impl Queue {
         }
     }
 
-    #[tracing::instrument(skip(self))]
+    #[cfg_attr(feature = "instrumentation", tracing::instrument(skip(self)))]
     async fn publish_item(
         &self,
         item: &QueueItem,

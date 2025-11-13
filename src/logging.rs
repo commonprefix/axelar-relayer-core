@@ -13,13 +13,31 @@ use sentry::ClientInitGuard;
 use sentry_tracing::EventFilter;
 use std::collections::{BTreeMap, HashMap};
 use std::env;
+use std::future::Future;
 use std::sync::Arc;
 use tracing::level_filters::LevelFilter;
 use tracing::{debug, Level, Span};
 use tracing_opentelemetry::OpenTelemetrySpanExt;
+use tracing_subscriber::fmt::format::FmtSpan;
 use tracing_subscriber::layer::SubscriberExt;
 use tracing_subscriber::util::SubscriberInitExt;
 use tracing_subscriber::{fmt, Layer};
+
+#[cfg(feature = "instrumentation")]
+pub fn maybe_instrument<F>(fut: F, span: Span) -> impl Future<Output = F::Output>
+where
+    F: Future,
+{
+    fut.instrument(span)
+}
+
+#[cfg(not(feature = "instrumentation"))]
+pub fn maybe_instrument<F>(fut: F, _span: Span) -> impl Future<Output = F::Output>
+where
+    F: Future,
+{
+    fut
+}
 
 pub fn setup_logging(config: &Config) -> (ClientInitGuard, SdkTracerProvider) {
     let environment = std::env::var("ENVIRONMENT").unwrap_or_else(|_| "development".to_string());
@@ -75,6 +93,7 @@ pub fn setup_logging(config: &Config) -> (ClientInitGuard, SdkTracerProvider) {
 
     let fmt_layer = fmt::layer()
         .event_format(fmt::format().compact())
+        .with_span_events(FmtSpan::NONE)
         .with_filter(LevelFilter::DEBUG);
 
     let sentry_layer = sentry::integrations::tracing::layer()

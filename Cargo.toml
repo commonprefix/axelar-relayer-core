@@ -90,6 +90,7 @@ path = "src/bin/recovery/dlq_recovery.rs"
 
 [features]
 mocks = ["dep:mockall"]
+instrumentation = []
 
 [lints.clippy]
 uninlined_format_args = "allow"

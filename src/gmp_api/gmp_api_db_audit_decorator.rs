@@ -48,6 +48,7 @@ use crate::gmp_api::gmp_types::{
     PostEventResult, QueryRequest, Task,
 };
 use crate::gmp_api::{GmpApi, GmpApiTrait};
+use crate::logging::maybe_instrument;
 use crate::models::gmp_events::{EventModel, GMPAudit, PgGMPEvents};
 use crate::models::gmp_tasks::{GMPTaskAudit, PgGMPTasks, TaskModel};
 use crate::utils::ThreadSafe;
@@ -126,7 +127,7 @@ where
         self.gmp_api.get_chain()
     }
 
-    #[tracing::instrument(skip(self))]
+    #[cfg_attr(feature = "instrumentation", tracing::instrument(skip(self)))]
     async fn get_tasks_action(&self, after: Option<String>) -> Result<Vec<Task>, GmpApiError> {
         let tasks = self.gmp_api.get_tasks_action(after).await?;
         let gmp_tasks = Arc::clone(&self.gmp_tasks);
@@ -144,7 +145,7 @@ where
         Ok(tasks)
     }
 
-    #[tracing::instrument(skip(self))]
+    #[cfg_attr(feature = "instrumentation", tracing::instrument(skip(self)))]
     async fn post_events(&self, events: Vec<Event>) -> Result<Vec<PostEventResult>, GmpApiError> {
         let mut event_models = Vec::new();
         for event in &events {
@@ -165,7 +166,7 @@ where
                             let result_clone = result.clone();
                             // We spawn a task because this is probably OK, and losing a response
                             // is not the end of the world
-                            spawn(
+                            spawn(maybe_instrument(
                                 async move {
                                     if let Err(e) = gmp_events
                                         .update_event_response(event_id, Json(result_clone))
@@ -176,9 +177,9 @@ where
                                             e
                                         );
                                     }
-                                }
-                                .instrument(Span::current()),
-                            );
+                                },
+                                Span::current(),
+                            ));
                         }
                         None => {
                             error!("Index in PostEventResult out of bounds: {:?}", results);
@@ -214,7 +215,7 @@ where
         results
     }
 
-    #[tracing::instrument(skip(self))]
+    #[cfg_attr(feature = "instrumentation", tracing::instrument(skip(self)))]
     async fn post_broadcast(
         &self,
         contract_address: String,
@@ -223,7 +224,7 @@ where
         self.gmp_api.post_broadcast(contract_address, data).await
     }
 
-    #[tracing::instrument(skip(self))]
+    #[cfg_attr(feature = "instrumentation", tracing::instrument(skip(self)))]
     async fn get_broadcast_result(
         &self,
         contract_address: String,
@@ -234,7 +235,7 @@ where
             .await
     }
 
-    #[tracing::instrument(skip(self))]
+    #[cfg_attr(feature = "instrumentation", tracing::instrument(skip(self)))]
     async fn post_query(
         &self,
         contract_address: String,
@@ -243,17 +244,17 @@ where
         self.gmp_api.post_query(contract_address, data).await
     }
 
-    #[tracing::instrument(skip(self))]
+    #[cfg_attr(feature = "instrumentation", tracing::instrument(skip(self)))]
     async fn post_payload(&self, payload: &[u8]) -> Result<String, GmpApiError> {
         self.gmp_api.post_payload(payload).await
     }
 
-    #[tracing::instrument(skip(self))]
+    #[cfg_attr(feature = "instrumentation", tracing::instrument(skip(self)))]
     async fn get_payload(&self, hash: &str) -> Result<String, GmpApiError> {
         self.gmp_api.get_payload(hash).await
     }
 
-    #[tracing::instrument(skip(self))]
+    #[cfg_attr(feature = "instrumentation", tracing::instrument(skip(self)))]
     fn cannot_execute_message(
         &self,
         id: String,
@@ -266,7 +267,7 @@ where
             .cannot_execute_message(id, message_id, source_chain, details, reason)
     }
 
-    #[tracing::instrument(skip(self))]
+    #[cfg_attr(feature = "instrumentation", tracing::instrument(skip(self)))]
     async fn its_interchain_transfer(&self, xrpl_message: XRPLMessage) -> Result<(), GmpApiError> {
         self.gmp_api.its_interchain_transfer(xrpl_message).await
     }

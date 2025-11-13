@@ -4,12 +4,12 @@ use lapin::options::BasicAckOptions;
 use std::sync::Arc;
 use tokio_util::sync::CancellationToken;
 use tokio_util::task::TaskTracker;
-use tracing::{debug, error, info, info_span, Instrument};
+use tracing::{debug, error, info, info_span};
 use tracing_opentelemetry::OpenTelemetrySpanExt;
 
 use crate::gmp_api::GmpApiTrait;
 use crate::includer_worker::{IncluderTrait, IncluderWorker, IncluderWorkerTrait};
-use crate::logging::distributed_tracing_extract_parent_context;
+use crate::logging::{distributed_tracing_extract_parent_context, maybe_instrument};
 use crate::queue_consumer::QueueConsumer;
 use crate::utils::ThreadSafe;
 use crate::{
@@ -78,11 +78,7 @@ where
             span.set_parent(parent_cx);
 
             let data = delivery.data.clone();
-            if let Err(e) = worker
-                .process_delivery(&data)
-                .instrument(span.clone())
-                .await
-            {
+            if let Err(e) = maybe_instrument(worker.process_delivery(&data), span.clone()).await {
                 let mut force_requeue = false;
                 match e {
                     IncluderError::IrrelevantTask => {
@@ -94,17 +90,14 @@ where
                     }
                 }
 
-                if let Err(nack_err) = queue_clone
-                    .republish(delivery, force_requeue)
-                    .instrument(span.clone())
-                    .await
+                if let Err(nack_err) =
+                    maybe_instrument(queue_clone.republish(delivery, force_requeue), span.clone())
+                        .await
                 {
                     error!("Failed to republish message: {:?}", nack_err);
                 }
-            } else if let Err(ack_err) = delivery
-                .ack(BasicAckOptions::default())
-                .instrument(span.clone())
-                .await
+            } else if let Err(ack_err) =
+                maybe_instrument(delivery.ack(BasicAckOptions::default()), span.clone()).await
             {
                 let item = serde_json::from_slice::<QueueItem>(&delivery.data);
                 error!("Failed to ack item {:?}: {:?}", item, ack_err);

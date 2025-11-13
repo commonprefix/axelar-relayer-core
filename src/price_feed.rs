@@ -7,6 +7,7 @@ use tracing::{error, info, info_span, warn, Instrument};
 
 use crate::config::{Config, PriceFeedConfig};
 use crate::database::Database;
+use crate::logging::maybe_instrument;
 
 #[async_trait]
 trait PriceFeed {
@@ -50,7 +51,7 @@ impl CoinGeckoPriceFeed {
 
 #[async_trait]
 impl PriceFeed for CoinGeckoPriceFeed {
-    #[tracing::instrument(skip(self))]
+    #[cfg_attr(feature = "instrumentation", tracing::instrument(skip(self)))]
     async fn fetch(&self, pairs: &[String]) -> FetchResult {
         let (coin_ids, vs_currencies): (Vec<_>, Vec<_>) = pairs
             .iter()
@@ -113,7 +114,7 @@ impl<DB: Database> PriceFeeder<DB> {
         })
     }
 
-    #[tracing::instrument(skip(self))]
+    #[cfg_attr(feature = "instrumentation", tracing::instrument(skip(self)))]
     async fn store_prices(&self, prices: Vec<Option<Decimal>>) -> Result<(), anyhow::Error> {
         for (pair, price) in self.pairs.iter().zip(prices.iter()) {
             if let Some(price) = price {
@@ -130,12 +131,15 @@ impl<DB: Database> PriceFeeder<DB> {
             let span = info_span!("run");
             // TODO: When there are more feeds, aggregate the results
             for feed in &self.feeds {
-                if let Err(e) = async {
-                    let prices = feed.fetch(&self.pairs).instrument(span.clone()).await?;
-                    self.store_prices(prices).await?;
-                    Ok::<_, anyhow::Error>(())
-                }
-                .instrument(span.clone())
+                if let Err(e) = maybe_instrument(
+                    async {
+                        let prices =
+                            maybe_instrument(feed.fetch(&self.pairs), span.clone()).await?;
+                        self.store_prices(prices).await?;
+                        Ok::<_, anyhow::Error>(())
+                    },
+                    span.clone(),
+                )
                 .await
                 {
                     error!("Failed to update prices: {:?}", e);

@@ -249,7 +249,10 @@ pub fn setup_heartbeat(
     });
 }
 
-#[tracing::instrument(skip(config, price_view))]
+#[cfg_attr(
+    feature = "instrumentation",
+    tracing::instrument(skip(config, price_view))
+)]
 pub async fn convert_token_amount_to_drops<T>(
     config: &Config,
     amount: Decimal,

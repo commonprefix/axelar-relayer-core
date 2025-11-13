@@ -1,6 +1,6 @@
 use crate::gmp_api::{GmpApi, GmpApiDbAuditDecorator};
 use crate::ingestor_worker::{IngestorWorker, IngestorWorkerTrait};
-use crate::logging::distributed_tracing_extract_parent_context;
+use crate::logging::{distributed_tracing_extract_parent_context, maybe_instrument};
 use crate::logging_ctx_cache::LoggingCtxCache;
 use crate::models::gmp_events::PgGMPEvents;
 use crate::models::gmp_tasks::PgGMPTasks;
@@ -21,7 +21,7 @@ use tokio::select;
 use tokio::signal::unix::{signal, SignalKind};
 use tokio_util::sync::CancellationToken;
 use tokio_util::task::TaskTracker;
-use tracing::{debug, error, info, info_span, warn, Instrument};
+use tracing::{debug, error, info, info_span, warn};
 use tracing_opentelemetry::OpenTelemetrySpanExt;
 
 pub struct Ingestor<W: IngestorWorkerTrait + Clone + ThreadSafe> {
@@ -61,11 +61,7 @@ where
             span.set_parent(parent_cx);
 
             let data = delivery.data.clone();
-            if let Err(e) = worker
-                .process_delivery(&data)
-                .instrument(span.clone())
-                .await
-            {
+            if let Err(e) = maybe_instrument(worker.process_delivery(&data), span.clone()).await {
                 let mut force_requeue = false;
                 match e {
                     IngestorError::IrrelevantTask => {
@@ -77,17 +73,14 @@ where
                     }
                 }
 
-                if let Err(nack_err) = queue_clone
-                    .republish(delivery, force_requeue)
-                    .instrument(span.clone())
-                    .await
+                if let Err(nack_err) =
+                    maybe_instrument(queue_clone.republish(delivery, force_requeue), span.clone())
+                        .await
                 {
                     error!("Failed to republish message: {:?}", nack_err);
                 }
-            } else if let Err(ack_err) = delivery
-                .ack(BasicAckOptions::default())
-                .instrument(span.clone())
-                .await
+            } else if let Err(ack_err) =
+                maybe_instrument(delivery.ack(BasicAckOptions::default()), span.clone()).await
             {
                 let item = serde_json::from_slice::<QueueItem>(&delivery.data);
                 error!("Failed to ack item {:?}: {:?}", item, ack_err);

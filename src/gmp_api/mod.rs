@@ -103,7 +103,7 @@ impl GmpApi {
         })
     }
 
-    #[tracing::instrument]
+    #[cfg_attr(feature = "instrumentation", tracing::instrument)]
     async fn request_bytes_if_success(
         request: reqwest_middleware::RequestBuilder,
     ) -> Result<Vec<u8>, GmpApiError> {
@@ -152,7 +152,7 @@ impl GmpApi {
         }
     }
 
-    #[tracing::instrument]
+    #[cfg_attr(feature = "instrumentation", tracing::instrument)]
     async fn request_json<T: DeserializeOwned>(
         request: reqwest_middleware::RequestBuilder,
     ) -> Result<T, GmpApiError> {
@@ -184,7 +184,7 @@ impl GmpApiTrait for GmpApi {
         &self.chain
     }
 
-    #[tracing::instrument(skip(self))]
+    #[cfg_attr(feature = "instrumentation", tracing::instrument(skip(self)))]
     async fn get_tasks_action(&self, after: Option<String>) -> Result<Vec<Task>, GmpApiError> {
         let request_url = format!("{}/chains/{}/tasks", self.rpc_url, self.chain);
         let mut request = self.client.get(&request_url);
@@ -213,7 +213,7 @@ impl GmpApiTrait for GmpApi {
             .collect::<Vec<_>>())
     }
 
-    #[tracing::instrument(skip(self))]
+    #[cfg_attr(feature = "instrumentation", tracing::instrument(skip(self)))]
     async fn post_events(&self, events: Vec<Event>) -> Result<Vec<PostEventResult>, GmpApiError> {
         if events.is_empty() {
             debug!("No events to post.");
@@ -240,7 +240,7 @@ impl GmpApiTrait for GmpApi {
         Ok(response.results)
     }
 
-    #[tracing::instrument(skip(self))]
+    #[cfg_attr(feature = "instrumentation", tracing::instrument(skip(self)))]
     async fn post_broadcast(
         &self,
         contract_address: String,
@@ -417,7 +417,7 @@ impl GmpApiTrait for GmpApi {
         Ok(response.keccak256.trim_start_matches("0x").to_string())
     }
 
-    #[tracing::instrument(skip(self))]
+    #[cfg_attr(feature = "instrumentation", tracing::instrument(skip(self)))]
     async fn get_payload(&self, hash: &str) -> Result<String, GmpApiError> {
         let url = format!("{}/payloads/0x{}", self.rpc_url, hash.to_lowercase());
         let request = self.client.get(&url);

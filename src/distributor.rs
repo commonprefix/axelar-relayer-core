@@ -1,6 +1,6 @@
 use crate::gmp_api::utils::extract_message_ids_from_task;
 use crate::gmp_api::GmpApiTrait;
-use crate::logging::connect_span_to_message_id;
+use crate::logging::{connect_span_to_message_id, maybe_instrument};
 use crate::logging_ctx_cache::LoggingCtxCache;
 use crate::utils::ThreadSafe;
 use crate::{
@@ -61,7 +61,11 @@ where
             gmp_api,
             refunds_enabled,
             // Sane default as it's the minimum required for the relayer to work
-            supported_includer_tasks: vec![TaskKind::Refund, TaskKind::GatewayTx, TaskKind::Execute],
+            supported_includer_tasks: vec![
+                TaskKind::Refund,
+                TaskKind::GatewayTx,
+                TaskKind::Execute,
+            ],
             supported_ingestor_tasks: vec![
                 TaskKind::Verify,
                 TaskKind::ConstructProof,
@@ -89,7 +93,7 @@ where
         Ok(distributor)
     }
 
-    #[tracing::instrument(skip(self))]
+    #[cfg_attr(feature = "instrumentation", tracing::instrument(skip(self)))]
     pub async fn store_last_task_id(&mut self) -> Result<(), DistributorError> {
         if let Some(task_id) = &self.last_task_id {
             self.db
@@ -110,12 +114,12 @@ where
         tasks_filter: Option<Vec<TaskKind>>,
     ) -> Result<Vec<String>, DistributorError> {
         let mut processed_task_ids = Vec::new();
-        let tasks = self
-            .gmp_api
-            .get_tasks_action(self.last_task_id.clone())
-            .instrument(info_span!("get_tasks"))
-            .await
-            .map_err(|e| DistributorError::GenericError(format!("Failed to get tasks: {}", e)))?;
+        let tasks = maybe_instrument(
+            self.gmp_api.get_tasks_action(self.last_task_id.clone()),
+            info_span!("get_tasks"),
+        )
+        .await
+        .map_err(|e| DistributorError::GenericError(format!("Failed to get tasks: {}", e)))?;
 
         for task in tasks {
             let task_id = task.id();
@@ -126,7 +130,7 @@ where
             processed_task_ids.push(task_id.clone());
             self.last_task_id = Some(task_id);
 
-            if let Err(err) = self.store_last_task_id().instrument(span.clone()).await {
+            if let Err(err) = maybe_instrument(self.store_last_task_id(), span.clone()).await {
                 warn!("{:?}", err);
             }
             if let Some(tasks_filter) = &tasks_filter {
@@ -152,7 +156,7 @@ where
                 continue;
             };
 
-            queue.publish(task_item.clone()).instrument(span).await;
+            maybe_instrument(queue.publish(task_item.clone()), span).await;
         }
         Ok(processed_task_ids)
     }

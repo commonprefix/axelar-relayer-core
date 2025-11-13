@@ -1,4 +1,7 @@
-use crate::queue::{QueueItem, QueueTrait};
+use crate::{
+    logging::maybe_instrument,
+    queue::{QueueItem, QueueTrait},
+};
 use futures::Stream;
 use std::{future::Future, pin::Pin, sync::Arc};
 use tracing::{debug, error, info, info_span, Instrument};
@@ -81,7 +84,7 @@ where
                         let item = &QueueItem::Transaction(Box::new(chain_transaction.clone()));
                         info!("Publishing transaction: {:?}", chain_transaction);
 
-                        queue.publish(item.clone()).instrument(span).await;
+                        maybe_instrument(queue.publish(item.clone()), span).await;
                         debug!("Published tx: {:?}", item);
                     } else {
                         error!("Error making queue item: {:?}", maybe_chain_transaction);
@@ -110,11 +113,7 @@ where
         let span = info_span!("recover_txs");
 
         for tx in txs {
-            let res = self
-                .transaction_poller
-                .poll_tx(tx)
-                .instrument(span.clone())
-                .await;
+            let res = maybe_instrument(self.transaction_poller.poll_tx(tx), span.clone()).await;
 
             match res {
                 Ok(tx) => {
