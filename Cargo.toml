@@ -88,6 +88,10 @@ path = "src/bin/recovery/proof_retrier.rs"
 name = "dlq_recovery"
 path = "src/bin/recovery/dlq_recovery.rs"
 
+[[bin]]
+name = "task_recovery"
+path = "src/bin/recovery/task_recovery.rs"
+
 [features]
 mocks = ["dep:mockall"]
 instrumentation = []

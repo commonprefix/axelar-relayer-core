@@ -10,13 +10,14 @@ use crate::{
     queue::{QueueItem, QueueTrait},
 };
 use std::sync::Arc;
-use tracing::{info, info_span, warn, Instrument};
+use tracing::{info, info_span, warn};
 
 #[derive(Clone)]
 pub struct RecoverySettings {
     pub from_task_id: Option<String>,
     pub to_task_id: String,
     pub tasks_filter: Option<Vec<TaskKind>>,
+    pub task_ids_filter: Option<Vec<String>>,
 }
 
 pub struct Distributor<DB: Database, G: GmpApiTrait + ThreadSafe> {
@@ -112,6 +113,7 @@ where
         includer_queue: Arc<dyn QueueTrait>,
         ingestor_queue: Arc<dyn QueueTrait>,
         tasks_filter: Option<Vec<TaskKind>>,
+        task_ids_filter: Option<Vec<String>>,
     ) -> Result<Vec<String>, DistributorError> {
         let mut processed_task_ids = Vec::new();
         let tasks = maybe_instrument(
@@ -128,13 +130,19 @@ where
             connect_span_to_message_id(&span, message_ids, &self.logging_ctx_cache).await;
 
             processed_task_ids.push(task_id.clone());
-            self.last_task_id = Some(task_id);
+            self.last_task_id = Some(task_id.clone());
 
             if let Err(err) = maybe_instrument(self.store_last_task_id(), span.clone()).await {
                 warn!("{:?}", err);
             }
             if let Some(tasks_filter) = &tasks_filter {
                 if !tasks_filter.contains(&task.kind()) {
+                    continue;
+                }
+            }
+
+            if let Some(task_ids_filter) = &task_ids_filter {
+                if !task_ids_filter.contains(&task_id) {
                     continue;
                 }
             }
@@ -173,6 +181,7 @@ where
                     Arc::clone(&includer_queue),
                     Arc::clone(&ingestor_queue),
                     None,
+                    None,
                 )
                 .await;
             if let Err(err) = work_res {
@@ -201,6 +210,7 @@ where
                     Arc::clone(&includer_queue),
                     Arc::clone(&ingestor_queue),
                     recovery_settings.tasks_filter.clone(),
+                    recovery_settings.task_ids_filter.clone(),
                 )
                 .await;
             if let Err(err) = work_res {
