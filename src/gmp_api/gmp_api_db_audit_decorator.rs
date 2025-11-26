@@ -56,7 +56,7 @@ use async_trait::async_trait;
 use sqlx::{types::Json, PgPool};
 use std::sync::Arc;
 use tokio::spawn;
-use tracing::{error, Instrument, Span};
+use tracing::{error, Span};
 use xrpl_amplifier_types::msg::XRPLMessage;
 
 pub struct GmpApiDbAuditDecorator<T: GmpApiTrait, U: GMPTaskAudit, V: GMPAudit> {

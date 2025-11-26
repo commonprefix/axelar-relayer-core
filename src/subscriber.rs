@@ -4,7 +4,7 @@ use crate::{
 };
 use futures::Stream;
 use std::{future::Future, pin::Pin, sync::Arc};
-use tracing::{debug, error, info, info_span, Instrument};
+use tracing::{debug, error, info, info_span};
 use tracing_opentelemetry::OpenTelemetrySpanExt;
 
 pub trait TransactionListener {

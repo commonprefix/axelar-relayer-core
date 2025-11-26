@@ -53,8 +53,7 @@ async fn main() -> anyhow::Result<()> {
         config.refunds_enabled,
         Arc::new(logging_ctx_cache),
     )
-    .await
-    .unwrap();
+    .await?;
 
     let mut sigint = signal(SignalKind::interrupt())?;
     let mut sigterm = signal(SignalKind::terminate())?;

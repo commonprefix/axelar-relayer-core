@@ -74,10 +74,7 @@ where
 #[async_trait]
 pub trait IncluderTrait {
     async fn handle_execute_task(&self, task: ExecuteTask) -> Result<Vec<Event>, IncluderError>;
-    async fn handle_gateway_tx_task(
-        &self,
-        task: GatewayTxTask,
-    ) -> Result<Vec<Event>, IncluderError>;
+    async fn handle_gateway_tx_task(&self, task: GatewayTxTask) -> Result<(), IncluderError>;
     async fn handle_refund_task(&self, task: RefundTask) -> Result<(), IncluderError>;
 }
 
@@ -106,18 +103,10 @@ where
                 }
                 Task::GatewayTx(gateway_tx_task) => {
                     info!("Consuming task: {:?}", gateway_tx_task);
-                    let events = self
-                        .includer
+                    self.includer
                         .handle_gateway_tx_task(gateway_tx_task.clone())
                         .await
-                        .map_err(|e| IncluderError::GatewayTxTaskError(e.to_string()))?;
-
-                    self.gmp_api
-                        .post_events(events)
-                        .await
-                        .map_err(|e| IncluderError::ConsumerError(e.to_string()))?;
-
-                    Ok(())
+                        .map_err(|e| IncluderError::GatewayTxTaskError(e.to_string()))
                 }
                 Task::Refund(refund_task) => {
                     info!("Consuming task: {:?}", refund_task);

@@ -3,7 +3,7 @@ use coingecko::CoinGeckoClient;
 use rust_decimal::prelude::FromPrimitive;
 use rust_decimal::Decimal;
 use std::collections::HashMap;
-use tracing::{error, info, info_span, warn, Instrument};
+use tracing::{error, info, info_span, warn};
 
 use crate::config::{Config, PriceFeedConfig};
 use crate::database::Database;

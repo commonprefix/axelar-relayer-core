@@ -27,7 +27,7 @@ use tokio::{
     time::{self, Duration},
 };
 use tokio_util::sync::CancellationToken;
-use tracing::{debug, error, info, warn, Instrument, Span};
+use tracing::{debug, error, info, warn, Span};
 use uuid::Uuid;
 
 use crate::logging::{distributed_tracing_headers, maybe_instrument};
