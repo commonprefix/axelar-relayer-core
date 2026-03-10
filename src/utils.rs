@@ -235,7 +235,7 @@ pub fn setup_heartbeat(
                 info!("Heartbeat cancelled");
                 return;
             }
-            info!("Writing heartbeat to Redis");
+            debug!("Writing heartbeat to Redis");
             let set_opts =
                 SetOptions::default().with_expiration(SetExpiry::EX(HEARTBEAT_EXPIRATION));
             let result = redis_conn.set_options(service.clone(), 1, set_opts).await;
@@ -243,7 +243,7 @@ pub fn setup_heartbeat(
             if let Err(e) = result {
                 error!("Failed to write heartbeat: {}", e);
             }
-            info!("Heartbeat sent to Redis");
+            debug!("Heartbeat sent to Redis");
             tokio::time::sleep(tokio::time::Duration::from_secs(15)).await;
         }
     });

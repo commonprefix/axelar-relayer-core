@@ -28,7 +28,7 @@ pub trait QueueConsumer {
 
         loop {
             debug!("Task tracker size: {}", tracker.len());
-            info!("Waiting for messages from {}", consumer.queue());
+            debug!("Waiting for messages from {}", consumer.queue());
             select! {
                 _ = token.cancelled() => {
                     info!("Cancellation requested; no longer awaiting consumer.next()");
