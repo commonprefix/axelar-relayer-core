@@ -10,7 +10,7 @@ use crate::{
     queue::{QueueItem, QueueTrait},
 };
 use std::sync::Arc;
-use tracing::{info, info_span, warn};
+use tracing::{debug, info, info_span, warn};
 
 #[derive(Clone)]
 pub struct RecoverySettings {
@@ -175,7 +175,7 @@ where
         ingestor_queue: Arc<dyn QueueTrait>,
     ) {
         loop {
-            info!("Distributor is alive.");
+            debug!("Distributor is alive.");
             let work_res = self
                 .work(
                     Arc::clone(&includer_queue),
