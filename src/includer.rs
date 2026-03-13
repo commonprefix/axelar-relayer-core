@@ -4,7 +4,7 @@ use lapin::options::BasicAckOptions;
 use std::sync::Arc;
 use tokio_util::sync::CancellationToken;
 use tokio_util::task::TaskTracker;
-use tracing::{debug, error, info, info_span};
+use tracing::{debug, error, info, info_span, warn};
 use tracing_opentelemetry::OpenTelemetrySpanExt;
 
 use crate::gmp_api::GmpApiTrait;
@@ -118,14 +118,25 @@ where
     pub fn new(worker: IncluderWorker<C, R, DB, G, I>) -> Self {
         Self { worker }
     }
+
     pub async fn run(&self, queue: Arc<dyn QueueTrait>, token: CancellationToken) {
-        if let Ok(mut consumer) = queue.consumer().await {
-            info!("Includer is alive.");
-            self.work(&mut consumer, Arc::clone(&queue), token.clone())
-                .await;
-            info!("Includer is done.");
-        } else {
-            error!("Failed to create consumer");
+        loop {
+            match queue.consumer().await {
+                Ok(mut consumer) => {
+                    info!("Includer is alive.");
+                    self.work(&mut consumer, Arc::clone(&queue), token.clone())
+                        .await;
+                    if token.is_cancelled() {
+                        break;
+                    }
+                    warn!("Consumer stream ended unexpectedly. Recreating in 5s...");
+                }
+                Err(e) => {
+                    error!("Failed to create consumer: {:?}. Retrying in 5s...", e);
+                }
+            }
+            tokio::time::sleep(std::time::Duration::from_secs(5)).await;
         }
+        info!("Includer is done.");
     }
 }

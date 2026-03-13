@@ -43,8 +43,8 @@ pub trait QueueConsumer {
                             error!("Failed to receive delivery: {:?}", e);
                         }
                         None => {
-                            //TODO:  Consumer stream ended. Possibly handle reconnection logic here if needed.
-                            warn!("No more messages from consumer.");
+                            warn!("Consumer stream ended, returning to caller");
+                            break;
                         }
                     }
                 }
