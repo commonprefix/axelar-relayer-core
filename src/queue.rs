@@ -59,7 +59,6 @@ pub trait QueueTrait: ThreadSafe {
     async fn republish(&self, delivery: Delivery, force_requeue: bool)
         -> Result<(), anyhow::Error>;
     async fn consumer(&self) -> Result<Consumer, anyhow::Error>;
-    async fn refresh_connection(&self);
     async fn close(&self);
 }
 
@@ -533,10 +532,6 @@ impl QueueTrait for Queue {
 
     async fn consumer(&self) -> Result<Consumer, anyhow::Error> {
         self.consumer().await
-    }
-
-    async fn refresh_connection(&self) {
-        self.refresh_connection().await;
     }
 
     async fn close(&self) {
