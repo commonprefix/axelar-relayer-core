@@ -43,8 +43,18 @@ pub trait QueueConsumer {
                             error!("Failed to receive delivery: {:?}", e);
                         }
                         None => {
-                            //TODO:  Consumer stream ended. Possibly handle reconnection logic here if needed.
-                            warn!("No more messages from consumer.");
+                            warn!("Consumer stream ended. Reconnecting...");
+                            queue.refresh_connection().await;
+                            match queue.consumer().await {
+                                Ok(new_consumer) => {
+                                    *consumer = new_consumer;
+                                    info!("Consumer reconnected successfully.");
+                                }
+                                Err(e) => {
+                                    error!("Failed to recreate consumer: {:?}. Retrying in 30s...", e);
+                                    tokio::time::sleep(std::time::Duration::from_secs(30)).await;
+                                }
+                            }
                         }
                     }
                 }
