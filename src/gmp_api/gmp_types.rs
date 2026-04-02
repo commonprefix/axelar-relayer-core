@@ -250,6 +250,20 @@ impl Task {
         }
     }
 
+    pub fn message_id(&self) -> Option<String> {
+        match self {
+            Task::Execute(t) => Some(t.task.message.message_id.clone()),
+            Task::Verify(t) => Some(t.task.message.message_id.clone()),
+            Task::ConstructProof(t) => Some(t.task.message.message_id.clone()),
+            Task::Refund(t) => Some(t.task.message.message_id.clone()),
+            Task::GatewayTx(_)
+            | Task::ReactToWasmEvent(_)
+            | Task::ReactToExpiredSigningSession(_)
+            | Task::ReactToRetriablePoll(_)
+            | Task::Unknown(_) => None,
+        }
+    }
+
     pub fn kind(&self) -> TaskKind {
         use Task::*;
         match self {

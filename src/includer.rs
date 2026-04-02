@@ -86,7 +86,17 @@ where
                         force_requeue = true;
                     }
                     _ => {
-                        error!("Failed to consume delivery: {:?}", e);
+                        let (task_id, message_id) = match serde_json::from_slice::<QueueItem>(&data)
+                        {
+                            Ok(QueueItem::Task(task)) => (Some(task.id()), task.message_id()),
+                            _ => (None, None),
+                        };
+                        error!(
+                            task_id = task_id.as_deref().unwrap_or("unknown"),
+                            message_id = message_id.as_deref().unwrap_or("n/a"),
+                            "Failed to consume delivery: {:?}",
+                            e
+                        );
                     }
                 }
 
