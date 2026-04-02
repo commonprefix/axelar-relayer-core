@@ -1,3 +1,4 @@
+use crate::gmp_api::utils::extract_message_ids_from_task;
 use crate::gmp_api::{GmpApi, GmpApiDbAuditDecorator};
 use crate::ingestor_worker::{IngestorWorker, IngestorWorkerTrait};
 use crate::logging::{distributed_tracing_extract_parent_context, maybe_instrument};
@@ -71,7 +72,11 @@ where
                     _ => {
                         let (task_id, message_id) = match serde_json::from_slice::<QueueItem>(&data)
                         {
-                            Ok(QueueItem::Task(task)) => (Some(task.id()), task.message_id()),
+                            Ok(QueueItem::Task(task)) => {
+                                let msg_id =
+                                    extract_message_ids_from_task(&task).into_iter().next();
+                                (Some(task.id()), msg_id)
+                            }
                             _ => (None, None),
                         };
                         error!(

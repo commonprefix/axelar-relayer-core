@@ -7,6 +7,7 @@ use tokio_util::task::TaskTracker;
 use tracing::{debug, error, info, info_span, warn};
 use tracing_opentelemetry::OpenTelemetrySpanExt;
 
+use crate::gmp_api::utils::extract_message_ids_from_task;
 use crate::gmp_api::GmpApiTrait;
 use crate::includer_worker::{IncluderTrait, IncluderWorker, IncluderWorkerTrait};
 use crate::logging::{distributed_tracing_extract_parent_context, maybe_instrument};
@@ -88,7 +89,11 @@ where
                     _ => {
                         let (task_id, message_id) = match serde_json::from_slice::<QueueItem>(&data)
                         {
-                            Ok(QueueItem::Task(task)) => (Some(task.id()), task.message_id()),
+                            Ok(QueueItem::Task(task)) => {
+                                let msg_id =
+                                    extract_message_ids_from_task(&task).into_iter().next();
+                                (Some(task.id()), msg_id)
+                            }
                             _ => (None, None),
                         };
                         error!(
