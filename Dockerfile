@@ -22,7 +22,8 @@ RUN mkdir -p src/bin/scripts src/bin/recovery && \
     echo 'fn main() {}' > src/bin/scripts/queue_migration.rs && \
     echo 'fn main() {}' > src/bin/recovery/proof_retrier.rs && \
     echo 'fn main() {}' > src/bin/recovery/task_recovery.rs && \
-    echo 'fn main() {}' > src/bin/recovery/dlq_recovery.rs
+    echo 'fn main() {}' > src/bin/recovery/dlq_recovery.rs && \
+    echo 'fn main() {}' > src/bin/heartbeat_monitor.rs
 
 
 # Build dependencies (this will cache them)

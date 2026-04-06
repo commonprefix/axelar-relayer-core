@@ -25,6 +25,14 @@ services:
     env_file:
       - .env
 
+  heartbeat_monitor:
+    build:
+      context: .
+      args:
+        BINARY_NAME: heartbeat_monitor
+    env_file:
+      - .env
+
   redis:
     image: redis:alpine
     container_name: redis
@@ -136,4 +144,4 @@ volumes:
 
 networks:
   axelar-relayer:
-    name: axelar-relayer
+    name: ${NETWORK}-axelar-relayer-core
