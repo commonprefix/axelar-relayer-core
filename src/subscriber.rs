@@ -88,7 +88,11 @@ where
                         debug!("Published tx: {:?}", item);
                     } else {
                         error!(
-                            account_id = self.transaction_poller.account_id(&account).as_deref().unwrap_or("unknown"),
+                            account_id = self
+                                .transaction_poller
+                                .account_id(&account)
+                                .as_deref()
+                                .unwrap_or("unknown"),
                             "Error making queue item: {:?}", maybe_chain_transaction
                         );
                     }
@@ -96,7 +100,11 @@ where
             }
             Err(e) => {
                 error!(
-                    account_id = self.transaction_poller.account_id(&account).as_deref().unwrap_or("unknown"),
+                    account_id = self
+                        .transaction_poller
+                        .account_id(&account)
+                        .as_deref()
+                        .unwrap_or("unknown"),
                     "Error getting txs: {:?}", e
                 );
                 debug!("Retrying in 2 seconds");
