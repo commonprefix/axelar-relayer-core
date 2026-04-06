@@ -133,7 +133,7 @@ where
             self.last_task_id = Some(task_id.clone());
 
             if let Err(err) = maybe_instrument(self.store_last_task_id(), span.clone()).await {
-                warn!("{:?}", err);
+                warn!(task_id = %task_id, "Failed to store last_task_id: {:?}", err);
             }
             if let Some(tasks_filter) = &tasks_filter {
                 if !tasks_filter.contains(&task.kind()) {

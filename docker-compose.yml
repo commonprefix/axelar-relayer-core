@@ -1,3 +1,5 @@
+name: ${NETWORK}-axelar-relayer-core
+
 services:
   distributor:
     build:
