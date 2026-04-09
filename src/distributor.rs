@@ -18,6 +18,7 @@ pub struct RecoverySettings {
     pub to_task_id: String,
     pub tasks_filter: Option<Vec<TaskKind>>,
     pub task_ids_filter: Option<Vec<String>>,
+    pub message_ids_filter: Option<Vec<String>>,
 }
 
 pub struct Distributor<DB: Database, G: GmpApiTrait + ThreadSafe> {
@@ -144,6 +145,18 @@ where
             if let Some(task_ids_filter) = &task_ids_filter {
                 if !task_ids_filter.contains(&task_id) {
                     continue;
+                }
+            }
+
+            if let Some(ref recovery) = self.recovery_settings {
+                if let Some(ref message_ids_filter) = recovery.message_ids_filter {
+                    let task_message_ids = extract_message_ids_from_task(&task);
+                    if !task_message_ids
+                        .iter()
+                        .any(|id| message_ids_filter.contains(id))
+                    {
+                        continue;
+                    }
                 }
             }
 
