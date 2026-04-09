@@ -151,9 +151,10 @@ where
             if let Some(ref recovery) = self.recovery_settings {
                 if let Some(ref message_ids_filter) = recovery.message_ids_filter {
                     let task_message_ids = extract_message_ids_from_task(&task);
-                    if !task_message_ids
-                        .iter()
-                        .any(|id| message_ids_filter.contains(id))
+                    if !task_message_ids.is_empty()
+                        && !task_message_ids
+                            .iter()
+                            .any(|id| message_ids_filter.contains(id))
                     {
                         continue;
                     }
