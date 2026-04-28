@@ -181,21 +181,26 @@ pub async fn run_ingestor(
 
     tokio::pin!(handle);
 
-    tokio::select! {
+    let handle_completed = tokio::select! {
         _ = sigint.recv()  => {
             sigint_cloned_token.cancel();
+            false
         },
         _ = sigterm.recv() => {
             sigterm_cloned_token.cancel();
+            false
         },
         _ = &mut handle => {
             info!("Ingestor stopped");
             ingestor_cloned_token.cancel();
+            true
         }
-    }
+    };
 
     tasks_queue.close().await;
     events_queue.close().await;
-    let _ = handle.await;
+    if !handle_completed {
+        let _ = handle.await;
+    }
     Ok(())
 }

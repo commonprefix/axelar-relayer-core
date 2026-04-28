@@ -49,6 +49,8 @@ async fn main() -> anyhow::Result<()> {
             tasks_filter: Some(vec![TaskKind::Execute]),
             task_ids_filter: Some(vec!["019a93a4-9038-77fc-ba57-6264b49d9f70".to_string()]),
             // task_ids_filter: None,
+            message_ids_filter: Some(vec!["0x-placeholder-message-id".to_string()]),
+            // message_ids_filter: None,
         },
         config.refunds_enabled,
         Arc::new(logging_ctx_cache),

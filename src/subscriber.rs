@@ -87,12 +87,26 @@ where
                         maybe_instrument(queue.publish(item.clone()), span).await;
                         debug!("Published tx: {:?}", item);
                     } else {
-                        error!("Error making queue item: {:?}", maybe_chain_transaction);
+                        error!(
+                            account_id = self
+                                .transaction_poller
+                                .account_id(&account)
+                                .as_deref()
+                                .unwrap_or("unknown"),
+                            "Error making queue item: {:?}", maybe_chain_transaction
+                        );
                     }
                 }
             }
             Err(e) => {
-                error!("Error getting txs: {:?}", e);
+                error!(
+                    account_id = self
+                        .transaction_poller
+                        .account_id(&account)
+                        .as_deref()
+                        .unwrap_or("unknown"),
+                    "Error getting txs: {:?}", e
+                );
                 debug!("Retrying in 2 seconds");
             }
         }
@@ -113,6 +127,7 @@ where
         let span = info_span!("recover_txs");
 
         for tx in txs {
+            let tx_id = tx.clone();
             let res = maybe_instrument(self.transaction_poller.poll_tx(tx), span.clone()).await;
 
             match res {
@@ -125,11 +140,11 @@ where
                         queue.publish(item.clone()).await;
                         debug!("Published tx: {:?}", item);
                     } else {
-                        error!("Error making queue item: {:?}", maybe_chain_transaction);
+                        error!(tx_id = %tx_id, "Error making queue item: {:?}", maybe_chain_transaction);
                     }
                 }
                 Err(e) => {
-                    error!("Error getting txs: {:?}", e);
+                    error!(tx_id = %tx_id, "Error getting txs: {:?}", e);
                     debug!("Retrying in 2 seconds");
                 }
             }
