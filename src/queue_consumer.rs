@@ -86,7 +86,15 @@ async fn recreate_consumer(
             _ = tokio::time::sleep(Duration::from_secs(*delay_secs)) => {}
         }
 
-        match queue.consumer().await {
+        let consumer_result = select! {
+            _ = token.cancelled() => {
+                info!("Cancellation during consumer recreation; aborting retries.");
+                return false;
+            }
+            res = queue.consumer() => res,
+        };
+
+        match consumer_result {
             Ok(new_consumer) => {
                 info!(
                     "Consumer recreated successfully on attempt {}/{}",
