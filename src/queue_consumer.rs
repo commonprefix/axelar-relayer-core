@@ -10,7 +10,7 @@ use tokio_util::sync::CancellationToken;
 use tokio_util::task::TaskTracker;
 use tracing::{debug, error, info, warn};
 
-const CONSUMER_RECREATE_DELAYS_SECS: [u64; 3] = [1, 3, 5];
+const CONSUMER_RECREATE_DELAYS_SECS: [u64; 3] = [5, 10, 15];
 
 #[async_trait]
 pub trait QueueConsumer {
@@ -43,7 +43,7 @@ pub trait QueueConsumer {
                             self.on_delivery(delivery, Arc::clone(&queue), &tracker).await;
                         }
                         Some(Err(e)) => {
-                            error!("Failed to receive delivery: {:?}. Attempting to recreate consumer.", e);
+                            warn!("Failed to receive delivery: {:?}. Attempting to recreate consumer.", e);
                             if !recreate_consumer(consumer, &queue, &token).await {
                                 break 'outer;
                             }
@@ -113,7 +113,7 @@ async fn recreate_consumer(
     }
 
     error!(
-        "Failed to recreate consumer after {} attempts; exiting work loop",
+        "Failed to recreate consumer after {} attempts",
         CONSUMER_RECREATE_DELAYS_SECS.len()
     );
     false
