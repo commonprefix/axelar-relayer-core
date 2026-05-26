@@ -4,7 +4,7 @@ use lapin::options::BasicAckOptions;
 use std::sync::Arc;
 use tokio_util::sync::CancellationToken;
 use tokio_util::task::TaskTracker;
-use tracing::{debug, error, info, info_span};
+use tracing::{debug, error, info, info_span, warn};
 use tracing_opentelemetry::OpenTelemetrySpanExt;
 
 use crate::gmp_api::utils::extract_message_ids_from_task;
@@ -144,6 +144,6 @@ where
         };
         info!("Includer is alive.");
         self.work(&mut consumer, Arc::clone(&queue), token).await;
-        info!("Includer is done.");
+        warn!("Queue consumer closed.");
     }
 }
