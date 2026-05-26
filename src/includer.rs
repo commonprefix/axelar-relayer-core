@@ -135,23 +135,15 @@ where
     }
 
     pub async fn run(&self, queue: Arc<dyn QueueTrait>, token: CancellationToken) {
-        loop {
-            match queue.consumer().await {
-                Ok(mut consumer) => {
-                    info!("Includer is alive.");
-                    self.work(&mut consumer, Arc::clone(&queue), token.clone())
-                        .await;
-                    if token.is_cancelled() {
-                        break;
-                    }
-                    warn!("Consumer stream ended unexpectedly. Recreating in 5s...");
-                }
-                Err(e) => {
-                    error!("Failed to create consumer: {:?}. Retrying in 5s...", e);
-                }
+        let mut consumer = match queue.consumer().await {
+            Ok(consumer) => consumer,
+            Err(e) => {
+                error!("Failed to create consumer: {:?}", e);
+                return;
             }
-            tokio::time::sleep(std::time::Duration::from_secs(5)).await;
-        }
-        info!("Includer is done.");
+        };
+        info!("Includer is alive.");
+        self.work(&mut consumer, Arc::clone(&queue), token).await;
+        warn!("Queue consumer closed.");
     }
 }
